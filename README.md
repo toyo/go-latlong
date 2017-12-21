@@ -1,4 +1,4 @@
-# go-latlong
+# go-latlong [![GoDoc](https://godoc.org/github.com/toyo/go-latlong?status.svg)](https://godoc.org/github.com/toyo/go-latlong)
 
 ## Usage
 
