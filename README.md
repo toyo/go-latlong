@@ -1,4 +1,5 @@
-# go-latlong [![GoDoc](https://godoc.org/github.com/toyo/go-latlong?status.svg)](https://godoc.org/github.com/toyo/go-latlong)
+# go-latlong
+[![Build Status](https://travis-ci.org/toyo/go-latlong.svg?branch=master)](https://travis-ci.org/toyo/go-latlong) [![GoDoc](https://godoc.org/github.com/toyo/go-latlong?status.svg)](https://godoc.org/github.com/toyo/go-latlong)
 
 ## Usage
 
