@@ -1,11 +1,10 @@
 inspecode:
-  experimental:
-    ignore: /*_test.go
   # golang configuration.
   cpd: default
   gas: default
   unused: default
   errcheck: default
+    ignore: /*_test.go
   go-test: default
   go-vet: default
   gofmt: default

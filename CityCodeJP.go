@@ -61,7 +61,7 @@ func (latlong *LatLong) CityCodeJP() (code string, err error) {
 	err = decoder.Decode(&v)
 
 	if v.ResultInfo.Status != 200 {
-		err = errors.New(strconv.FormatInt(int64(v.Error.Code), 10) + v.Error.Message)
+		err = errors.New(strconv.Itoa(v.Error.Code) + v.Error.Message)
 		return
 	}
 
