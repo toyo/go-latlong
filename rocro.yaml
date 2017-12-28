@@ -6,11 +6,12 @@ inspecode:
   errcheck: default
   go-test: default
   go-vet: default
-  gofmt: auto-fix
-  goimports: auto-fix
-  golint: auto-fix
+  gofmt: default
+  goimports: default
+  golint: default
   gosimple: default
   grep: default
   ineffassign: default
   interfacer: default
-  misspell: auto-fix
+  misspell: default
+  
