@@ -1,4 +1,6 @@
 inspecode:
+  experimental:
+    ignore: /*_test.go
   # golang configuration.
   cpd: default
   gas: default
@@ -14,4 +16,3 @@ inspecode:
   ineffassign: default
   interfacer: default
   misspell: default
-  
