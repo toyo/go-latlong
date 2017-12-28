@@ -149,7 +149,7 @@ type config struct {
 	Lang             string
 }
 
-// Config is an configuration of enviroment.
+// Config is an configuration of environment.
 var Config = config{
 	HTTPClient:    &http.Client{},
 	Lang:          "en", //= "ja" 	// Lang is an string language
