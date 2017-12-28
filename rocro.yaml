@@ -1,0 +1,16 @@
+inspecode:
+  # golang configuration.
+  cpd: default
+  gas: default
+  unused: default
+  errcheck: default
+  go-test: default
+  go-vet: default
+  gofmt: auto-fix
+  goimports: auto-fix
+  golint: auto-fix
+  gosimple: default
+  grep: default
+  ineffassign: default
+  interfacer: default
+  misspell: auto-fix
