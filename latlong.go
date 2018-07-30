@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/golang/geo/s1"
 	"github.com/golang/geo/s2"
 )
 
@@ -42,13 +43,23 @@ func (latlong *LatLong) Scan(state fmt.ScanState, verb rune) (err error) {
 }
 
 // Lat is getter for latitude
-func (latlong *LatLong) Lat() float64 {
+func (latlong LatLong) Lat() float64 {
 	return latlong.Center().Lat.Degrees()
 }
 
 // Lng is getter for longitude
-func (latlong *LatLong) Lng() float64 {
+func (latlong LatLong) Lng() float64 {
 	return latlong.Center().Lng.Degrees()
+}
+
+// DistanceAngle in radian.
+func (latlong LatLong) DistanceAngle(latlong1 LatLong) s1.Angle {
+	return latlong.Center().Distance(latlong1.Center())
+}
+
+// DistanceEarthKm in km at surface.
+func (latlong LatLong) DistanceEarthKm(latlong1 LatLong) float64 {
+	return float64(latlong.DistanceAngle(latlong1) / 3.14 * 20037.5)
 }
 
 var msgCatalog = map[string]struct {
@@ -81,7 +92,7 @@ var msgCatalog = map[string]struct {
 }
 
 // LatString is string getter for latitude
-func (latlong *LatLong) LatString() (s string) {
+func (latlong LatLong) LatString() (s string) {
 	latprec := int(-math.Log10(latlong.Rect.Size().Lat.Degrees()))
 	if latprec < 0 {
 		latprec = 0
@@ -97,7 +108,7 @@ func (latlong *LatLong) LatString() (s string) {
 }
 
 // LngString is string getter for longitude
-func (latlong *LatLong) LngString() (s string) {
+func (latlong LatLong) LngString() (s string) {
 	lngprec := int(-math.Log10(latlong.Rect.Size().Lng.Degrees()))
 	if lngprec < 0 {
 		lngprec = 0
@@ -113,7 +124,7 @@ func (latlong *LatLong) LngString() (s string) {
 }
 
 // AltString is string getter for altitude
-func (latlong *LatLong) AltString() (s string) {
+func (latlong LatLong) AltString() (s string) {
 	if latlong.alt != nil {
 		if *latlong.alt > 0 {
 			s += fmt.Sprintf(msgCatalog[Config.Lang].elv, *latlong.alt)
