@@ -17,7 +17,8 @@ type LatLong struct {
 }
 
 // NewLatLong is from latitude and longitude.
-func NewLatLong(latitude, longitude, latprec, longprec float64) (latlong LatLong) {
+func NewLatLong(latitude, longitude, latprec, longprec float64) (latlong *LatLong) {
+	latlong = new(LatLong)
 	latlong.Rect = s2.RectFromCenterSize(
 		s2.LatLngFromDegrees(latitude, longitude),
 		s2.LatLngFromDegrees(latprec, longprec))
@@ -26,7 +27,7 @@ func NewLatLong(latitude, longitude, latprec, longprec float64) (latlong LatLong
 }
 
 // NewLatLongAlt is from latitude, longitude and altitude.
-func NewLatLongAlt(latitude, longitude, latprec, longprec float64, altitude float64) (latlongalt LatLong) {
+func NewLatLongAlt(latitude, longitude, latprec, longprec float64, altitude float64) (latlongalt *LatLong) {
 	latlongalt = NewLatLong(latitude, longitude, latprec, longprec)
 	latlongalt.alt = &altitude
 	return
@@ -37,7 +38,7 @@ func (latlong *LatLong) Scan(state fmt.ScanState, verb rune) (err error) {
 	var token []byte
 	token, err = state.Token(false, nil)
 	if err == nil {
-		*latlong = NewLatLongISO6709(string(token))
+		*latlong = *NewLatLongISO6709(string(token))
 	}
 	return
 }

@@ -31,7 +31,7 @@ func TestLatLongstring(t *testing.T) {
 	correctResponsells := "北緯12.34度、東経123.43度"
 	if lls != correctResponsells {
 		t.Errorf("expected %+v, was %+v", correctResponsells, lls)
-		for _, l := range ll {
+		for _, l := range *ll {
 			t.Error(l.String())
 			t.Error(l.PrecString())
 		}

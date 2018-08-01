@@ -9,7 +9,7 @@ import (
 
 // NewLatLongGeoHash is from GeoHash
 // http://geohash.org/
-func NewLatLongGeoHash(geoHash string) (latlong LatLong, err error) {
+func NewLatLongGeoHash(geoHash string) (latlong *LatLong, err error) {
 	if bb := geohash.Decode(geoHash); bb != nil {
 		latlong = NewLatLong(bb.Center().Lat(), bb.Center().Lng(), bb.NorthEast().Lat()-bb.SouthWest().Lat(), bb.NorthEast().Lng()-bb.SouthWest().Lng())
 		//fmt.Println(bb.NorthEast(), bb.SouthWest())

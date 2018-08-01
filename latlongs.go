@@ -8,15 +8,16 @@ import (
 )
 
 // LatLongs is slice of LatLong
-type LatLongs []LatLong
+type LatLongs []*LatLong
 
 // NewLatLongsISO6709 is from ISO6709 latlongs.
-func NewLatLongsISO6709(str string) (ll LatLongs, err error) {
+func NewLatLongsISO6709(str string) (ll *LatLongs, err error) {
+	ll = new(LatLongs)
 	for _, s := range strings.Split(str, "/") {
 		if s != "" {
 			l := NewLatLongISO6709(s)
 			if err == nil {
-				ll = append(ll, l)
+				*ll = append(*ll, l)
 			} else {
 				return
 			}
@@ -84,7 +85,9 @@ func (a *LatLongs) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err err
 
 	switch t := token.(type) {
 	case xml.CharData:
-		*a, err = NewLatLongsISO6709(string(t))
+		var b *LatLongs
+		b, err = NewLatLongsISO6709(string(t))
+		*a = *b
 		return
 	default:
 		err = errors.New("Unexpected Token on LatLongs")
