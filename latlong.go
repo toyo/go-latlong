@@ -54,12 +54,12 @@ func (latlong LatLong) Lng() float64 {
 }
 
 // DistanceAngle in radian.
-func (latlong LatLong) DistanceAngle(latlong1 LatLong) s1.Angle {
+func (latlong LatLong) DistanceAngle(latlong1 *LatLong) s1.Angle {
 	return latlong.Center().Distance(latlong1.Center())
 }
 
 // DistanceEarthKm in km at surface.
-func (latlong LatLong) DistanceEarthKm(latlong1 LatLong) float64 {
+func (latlong LatLong) DistanceEarthKm(latlong1 *LatLong) float64 {
 	return float64(latlong.DistanceAngle(latlong1) / 3.14 * 20037.5)
 }
 
