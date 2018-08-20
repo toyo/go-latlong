@@ -7,7 +7,7 @@ import (
 
 // NewLatLongGridLocator is from Grid Locator.
 // https://en.wikipedia.org/wiki/Maidenhead_Locator_System
-func NewLatLongGridLocator(gl string) (latlong *LatLong) {
+func NewLatLongGridLocator(gl string) *LatLong {
 	latitude := float64(-90)
 	longitude := float64(-180)
 
@@ -48,8 +48,7 @@ loop:
 			}
 		}
 	}
-	latlong = NewLatLong(latitude+latprec/2, longitude+lonprec/2, latprec, lonprec)
-	return
+	return NewLatLong(latitude+latprec/2, longitude+lonprec/2, latprec, lonprec)
 }
 
 // GridLocator is from Grid Locator.

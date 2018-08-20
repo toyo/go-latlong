@@ -17,13 +17,13 @@ type LatLong struct {
 }
 
 // NewLatLong is from latitude and longitude.
-func NewLatLong(latitude, longitude, latprec, longprec float64) (latlong *LatLong) {
-	latlong = new(LatLong)
+func NewLatLong(latitude, longitude, latprec, longprec float64) *LatLong {
+	latlong := new(LatLong)
 	latlong.Rect = s2.RectFromCenterSize(
 		s2.LatLngFromDegrees(latitude, longitude),
 		s2.LatLngFromDegrees(latprec, longprec))
 
-	return
+	return latlong
 }
 
 // NewLatLongAlt is from latitude, longitude and altitude.
