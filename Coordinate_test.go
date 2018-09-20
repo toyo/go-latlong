@@ -1,6 +1,8 @@
 package latlong
 
 import (
+	"bytes"
+	"encoding/json"
 	"testing"
 )
 
@@ -20,4 +22,16 @@ func TestString(t *testing.T) {
 		t.Errorf("expected %+v, was %+v", correctResponselp, lp)
 	}
 
+	b := new(bytes.Buffer)
+	err := json.NewEncoder(b).Encode(&l)
+	correctResponseJSON := "[139.708333,35.687500]\n"
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	JSON := b.String()
+
+	if JSON != correctResponseJSON {
+		t.Errorf("expected '%+v', was '%+v'", correctResponseJSON, JSON)
+	}
 }

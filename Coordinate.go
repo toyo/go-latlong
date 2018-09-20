@@ -16,6 +16,14 @@ type Coordinate struct {
 	alt *float64 // altitude
 }
 
+func (latlong *Coordinate) MarshalJSON() ([]byte, error) {
+	if latlong.alt != nil {
+		return []byte(fmt.Sprintf("[%f,%f,&f]", latlong.Lng(), latlong.Lat(), latlong.alt)), nil
+	}
+	//return []byte('[' + latlong.LatString() + ',' + latlong.LatString() + ']'), nil
+	return []byte(fmt.Sprintf("[%f,%f]", latlong.Lng(), latlong.Lat())), nil
+}
+
 // NewLatLong is from latitude and longitude.
 func NewLatLong(latitude, longitude, latprec, longprec float64) *Coordinate {
 	latlong := new(Coordinate)
