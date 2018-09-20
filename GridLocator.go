@@ -7,7 +7,7 @@ import (
 
 // NewLatLongGridLocator is from Grid Locator.
 // https://en.wikipedia.org/wiki/Maidenhead_Locator_System
-func NewLatLongGridLocator(gl string) *LatLong {
+func NewLatLongGridLocator(gl string) *Coordinate {
 	latitude := float64(-90)
 	longitude := float64(-180)
 
@@ -53,7 +53,7 @@ loop:
 
 // GridLocator is from Grid Locator.
 // https://en.wikipedia.org/wiki/Maidenhead_Locator_System
-func (latlong *LatLong) GridLocator() string {
+func (latlong *Coordinate) GridLocator() string {
 	const floaterr = 1 + 1E-11
 
 	var gl []rune

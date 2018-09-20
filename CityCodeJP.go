@@ -11,7 +11,7 @@ import (
 // CityCodeJP return city code.
 // http://www.soumu.go.jp/denshijiti/code.html
 // https://developer.yahoo.co.jp/webapi/map/openlocalplatform/v1/reversegeocoder.html
-func (latlong *LatLong) CityCodeJP() (code string, err error) {
+func (latlong *Coordinate) CityCodeJP() (code string, err error) {
 
 	req, err := http.NewRequest("GET", Config.YahooJPAPIURL, nil)
 	if err != nil {

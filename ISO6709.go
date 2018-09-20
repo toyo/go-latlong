@@ -133,7 +133,7 @@ func getLong(part string, pos int) (longitude float64, longprec float64) {
 }
 
 // NewLatLongISO6709 is from ISO6709 string
-func NewLatLongISO6709(iso6709 string) (ll *LatLong) {
+func NewLatLongISO6709(iso6709 string) (ll *Coordinate) {
 	re := regexp.MustCompile(`(?P<Latitude>[\+-][\d.]+)(?P<Longitude>[\+-][\d.]+)(?P<Altitude>[\+-][\d.]+)?`)
 	var latitude, longitude, latprec, longprec float64
 	var altitude *float64

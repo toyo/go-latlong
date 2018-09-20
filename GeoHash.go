@@ -9,7 +9,7 @@ import (
 
 // NewLatLongGeoHash is from GeoHash
 // http://geohash.org/
-func NewLatLongGeoHash(geoHash string) (latlong *LatLong, err error) {
+func NewLatLongGeoHash(geoHash string) (latlong *Coordinate, err error) {
 	if bb := geohash.Decode(geoHash); bb != nil {
 		latlong = NewLatLong(bb.Center().Lat(), bb.Center().Lng(), bb.NorthEast().Lat()-bb.SouthWest().Lat(), bb.NorthEast().Lng()-bb.SouthWest().Lng())
 		//fmt.Println(bb.NorthEast(), bb.SouthWest())
@@ -19,22 +19,22 @@ func NewLatLongGeoHash(geoHash string) (latlong *LatLong, err error) {
 	return
 }
 
-func (latlong *LatLong) geoHash(precision int) string {
+func (latlong *Coordinate) geoHash(precision int) string {
 	return geohash.EncodeWithPrecision(latlong.Lat(), latlong.Lng(), precision)
 }
 
 // GeoHash5 returns GeoHash string.
-func (latlong *LatLong) GeoHash5() string {
+func (latlong *Coordinate) GeoHash5() string {
 	return latlong.geoHash(5)
 }
 
 // GeoHash6 returns GeoHash string.
-func (latlong *LatLong) GeoHash6() string {
+func (latlong *Coordinate) GeoHash6() string {
 	return latlong.geoHash(6)
 }
 
 // GeoHash returns GeoHash string.
-func (latlong *LatLong) GeoHash() string {
+func (latlong *Coordinate) GeoHash() string {
 	const floaterr = 1 + 5E-10
 
 	geohashlatbits := -math.Log2(latlong.Size().Lat.Degrees()/45) + 2 // div by 180 = 45 * 2^2

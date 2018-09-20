@@ -7,7 +7,7 @@ import (
 )
 
 // SolarAngle returns an solar angle at time t.
-func (latlong *LatLong) SolarAngle(t time.Time) (zenithAngle float64) {
+func (latlong *Coordinate) SolarAngle(t time.Time) (zenithAngle float64) {
 	azimuth, zenithAngle := gosolarpos.Grena3(t,
 		latlong.Lat(),
 		latlong.Lng(),

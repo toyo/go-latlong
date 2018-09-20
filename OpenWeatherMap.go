@@ -5,7 +5,7 @@ import (
 )
 
 // CurrentWeatherData return a pointer of struct for CurrentWeatherData
-func (ll *LatLong) CurrentWeatherData(unit, lang, apikey string) (w *owm.CurrentWeatherData, err error) {
+func (ll *Coordinate) CurrentWeatherData(unit, lang, apikey string) (w *owm.CurrentWeatherData, err error) {
 	if w, err = owm.NewCurrent(unit, lang, apikey); err == nil {
 		if err = w.CurrentByCoordinates(&owm.Coordinates{Longitude: ll.Lng(), Latitude: ll.Lat()}); err == nil {
 			return
@@ -15,7 +15,7 @@ func (ll *LatLong) CurrentWeatherData(unit, lang, apikey string) (w *owm.Current
 }
 
 // CurrentPressure return a GrndLevel Pressure of the point.
-func (ll *LatLong) CurrentPressure(unit, lang, apikey string) float64 {
+func (ll *Coordinate) CurrentPressure(unit, lang, apikey string) float64 {
 	w, _ := ll.CurrentWeatherData(unit, lang, apikey)
 
 	return w.Main.GrndLevel
