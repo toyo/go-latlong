@@ -40,9 +40,7 @@ func (cds *Coordinates) S2Polyline() (ps s2.Polyline) {
 // S2Loop is getter for s2.Loop.
 func (cds *Coordinates) S2Loop() *s2.Loop {
 	lo := s2.LoopFromPoints(cds.S2Polyline())
-	if lo.TurningAngle() < 0 { // if loop is not CCW but CW,
-		lo.Invert() // Change to CCW.
-	}
+	lo.Normalize() // if loop is not CCW but CW, change to CCW.
 	return lo
 }
 
