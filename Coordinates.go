@@ -5,6 +5,8 @@ import (
 	"errors"
 	"io"
 	"strings"
+
+	"github.com/golang/geo/s2"
 )
 
 // Coordinates is slice of LatLong
@@ -25,6 +27,23 @@ func NewLatLongsISO6709(str string) (ll *Coordinates, err error) {
 	}
 	err = nil
 	return
+}
+
+// S2Polyline is getter for s2.Polyline ([]s2.Point).
+func (latlongs *Coordinates) S2Polyline() (ps s2.Polyline) {
+	for _, v := range *latlongs {
+		ps = append(ps, v.S2Point())
+	}
+	return
+}
+
+// S2Loop is getter for s2.Loop.
+func (latlongs *Coordinates) S2Loop() *s2.Loop {
+	lo := s2.LoopFromPoints(latlongs.S2Polyline())
+	if lo.TurningAngle() < 0 { // if loop is not CCW but CW,
+		lo.Invert() // Change to CCW.
+	}
+	return lo
 }
 
 func (a *Coordinates) unset(i int) {

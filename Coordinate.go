@@ -76,6 +76,16 @@ func (latlong *Coordinate) Scan(state fmt.ScanState, verb rune) (err error) {
 	return
 }
 
+// S2LatLng is getter for s2.LatLng
+func (latlong Coordinate) S2LatLng() s2.LatLng {
+	return latlong.Center()
+}
+
+// S2Point is getter for s2.Point
+func (latlong Coordinate) S2Point() s2.Point {
+	return s2.PointFromLatLng(latlong.S2LatLng())
+}
+
 // Lat is getter for latitude
 func (latlong Coordinate) Lat() float64 {
 	return latlong.Center().Lat.Degrees()
