@@ -30,35 +30,35 @@ func NewLatLongsISO6709(str string) (ll *Coordinates, err error) {
 }
 
 // S2Polyline is getter for s2.Polyline ([]s2.Point).
-func (latlongs *Coordinates) S2Polyline() (ps s2.Polyline) {
-	for _, v := range *latlongs {
+func (cds *Coordinates) S2Polyline() (ps s2.Polyline) {
+	for _, v := range *cds {
 		ps = append(ps, v.S2Point())
 	}
 	return
 }
 
 // S2Loop is getter for s2.Loop.
-func (latlongs *Coordinates) S2Loop() *s2.Loop {
-	lo := s2.LoopFromPoints(latlongs.S2Polyline())
+func (cds *Coordinates) S2Loop() *s2.Loop {
+	lo := s2.LoopFromPoints(cds.S2Polyline())
 	if lo.TurningAngle() < 0 { // if loop is not CCW but CW,
 		lo.Invert() // Change to CCW.
 	}
 	return lo
 }
 
-func (a *Coordinates) unset(i int) {
-	l := *a
+func (cds *Coordinates) unset(i int) {
+	l := *cds
 	if i >= len(l) {
 		return
 	}
 	l = append(l[:i], l[i+1:]...)
-	*a = l
+	*cds = l
 }
 
 // Uniq merge same element
-func (a *Coordinates) Uniq() {
-	if a != nil && len(*a) >= 2 {
-		ls := *a
+func (cds *Coordinates) Uniq() {
+	if cds != nil && len(*cds) >= 2 {
+		ls := *cds
 
 		l := len(ls)
 		if ls[l-2].Intersects(ls[l-1].Rect) { //Same point, different precision
@@ -75,22 +75,22 @@ func (a *Coordinates) Uniq() {
 			lm.Uniq()
 			ls = append(lm, ll)
 		}
-		*a = ls
+		*cds = ls
 	}
 }
 
-func (a Coordinates) String() string {
-	a.Uniq()
+func (cds Coordinates) String() string {
+	cds.Uniq()
 
 	var ss []string
-	for _, l := range a {
+	for _, l := range cds {
 		ss = append(ss, l.String())
 	}
 	return strings.Join(ss, ",")
 }
 
 // UnmarshalXML is Unmarshal function but NOT WORK.
-func (a *Coordinates) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error) {
+func (cds *Coordinates) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error) {
 	var token xml.Token
 
 	token, err = d.Token()
@@ -106,7 +106,7 @@ func (a *Coordinates) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err 
 	case xml.CharData:
 		var b *Coordinates
 		b, err = NewLatLongsISO6709(string(t))
-		*a = *b
+		*cds = *b
 		return
 	default:
 		err = errors.New("Unexpected Token on LatLongs")
