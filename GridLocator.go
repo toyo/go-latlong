@@ -48,7 +48,7 @@ loop:
 			}
 		}
 	}
-	return NewLatLong(latitude+latprec/2, longitude+lonprec/2, latprec, lonprec)
+	return NewLatLongAlt(latitude+latprec/2, longitude+lonprec/2, latprec, lonprec, nil)
 }
 
 // GridLocator is from Grid Locator.

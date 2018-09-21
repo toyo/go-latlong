@@ -11,7 +11,7 @@ import (
 // http://geohash.org/
 func NewLatLongGeoHash(geoHash string) (latlong *Coordinate, err error) {
 	if bb := geohash.Decode(geoHash); bb != nil {
-		latlong = NewLatLong(bb.Center().Lat(), bb.Center().Lng(), bb.NorthEast().Lat()-bb.SouthWest().Lat(), bb.NorthEast().Lng()-bb.SouthWest().Lng())
+		latlong = NewLatLongAlt(bb.Center().Lat(), bb.Center().Lng(), bb.NorthEast().Lat()-bb.SouthWest().Lat(), bb.NorthEast().Lng()-bb.SouthWest().Lng(), nil)
 		//fmt.Println(bb.NorthEast(), bb.SouthWest())
 	} else {
 		err = errors.New("Geohash decode error")
