@@ -18,7 +18,7 @@ type Coordinate struct {
 
 func (latlong *Coordinate) MarshalJSON() ([]byte, error) {
 	if latlong.alt != nil {
-		return []byte(fmt.Sprintf("[%f,%f,%f]", latlong.Lng(), latlong.Lat(), latlong.alt)), nil
+		return []byte(fmt.Sprintf("[%f,%f,%f]", latlong.Lng(), latlong.Lat(), *latlong.alt)), nil
 	}
 	//return []byte('[' + latlong.LatString() + ',' + latlong.LatString() + ']'), nil
 	return []byte(fmt.Sprintf("[%f,%f]", latlong.Lng(), latlong.Lat())), nil
