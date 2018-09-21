@@ -24,13 +24,12 @@ func TestString(t *testing.T) {
 
 	b := new(bytes.Buffer)
 	err := json.NewEncoder(b).Encode(&l)
-	correctResponseJSON := "[139.708333,35.687500]\n"
+	correctResponseJSON := "[139.7,35.7]\n"
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	JSON := b.String()
-
 	if JSON != correctResponseJSON {
 		t.Errorf("expected '%+v', was '%+v'", correctResponseJSON, JSON)
 	}

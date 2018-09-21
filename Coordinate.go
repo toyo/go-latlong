@@ -16,12 +16,13 @@ type Coordinate struct {
 	alt *float64 // altitude
 }
 
+// MarshalJSON is a marshaler for JSON.
 func (latlong *Coordinate) MarshalJSON() ([]byte, error) {
+	s := latlong.lngString() + "," + latlong.latString()
 	if latlong.alt != nil {
-		return []byte(fmt.Sprintf("[%f,%f,%f]", latlong.Lng(), latlong.Lat(), *latlong.alt)), nil
+		s += "," + latlong.altString()
 	}
-	//return []byte('[' + latlong.LatString() + ',' + latlong.LatString() + ']'), nil
-	return []byte(fmt.Sprintf("[%f,%f]", latlong.Lng(), latlong.Lat())), nil
+	return []byte("[" + s + "]"), nil
 }
 
 // NewLatLong is from latitude and longitude.
@@ -116,6 +117,15 @@ func (latlong Coordinate) LatString() (s string) {
 	return
 }
 
+// latString is string getter for latitude
+func (latlong Coordinate) latString() string {
+	latprec := int(-math.Log10(latlong.Rect.Size().Lat.Degrees()))
+	if latprec < 0 {
+		latprec = 0
+	}
+	return strconv.FormatFloat(latlong.Lat(), 'f', latprec, 64)
+}
+
 // LngString is string getter for longitude
 func (latlong Coordinate) LngString() (s string) {
 	lngprec := int(-math.Log10(latlong.Rect.Size().Lng.Degrees()))
@@ -132,6 +142,16 @@ func (latlong Coordinate) LngString() (s string) {
 	return
 }
 
+// lngString is string getter for longitude
+func (latlong Coordinate) lngString() string {
+	lngprec := int(-math.Log10(latlong.Rect.Size().Lng.Degrees()))
+	if lngprec < 0 {
+		lngprec = 0
+	}
+
+	return strconv.FormatFloat(latlong.Lng(), 'f', lngprec, 64)
+}
+
 // AltString is string getter for altitude
 func (latlong Coordinate) AltString() (s string) {
 	if latlong.alt != nil {
@@ -144,6 +164,14 @@ func (latlong Coordinate) AltString() (s string) {
 		}
 	}
 	return
+}
+
+// AltString is string getter for altitude
+func (latlong Coordinate) altString() string {
+	if latlong.alt != nil {
+		return strconv.FormatFloat(*latlong.alt, 'f', 0, 64)
+	}
+	return ""
 }
 
 func (latlong Coordinate) String() string {

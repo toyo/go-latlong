@@ -1,6 +1,8 @@
 package latlong
 
 import (
+	"bytes"
+	"encoding/json"
 	"testing"
 )
 
@@ -18,6 +20,19 @@ func TestNewLatLongAltsString(t *testing.T) {
 	if lls != correctResponsells {
 		t.Errorf("expected %+v, was %+v", correctResponsells, lls)
 	}
+
+	b := new(bytes.Buffer)
+	err = json.NewEncoder(b).Encode(&ll)
+	correctResponseJSON := "[[123.45,12.34,3776],[-12.57,1.39,-3776],[1.396,-0.209,-12345]]\n"
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	JSON := b.String()
+	if JSON != correctResponseJSON {
+		t.Errorf("expected '%+v', was '%+v'", correctResponseJSON, JSON)
+	}
+
 }
 
 func TestLatLongstring(t *testing.T) {
