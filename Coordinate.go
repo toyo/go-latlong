@@ -39,29 +39,29 @@ func (latlong *Coordinate) UnmarshalJSON(data []byte) (err error) {
 	if s[len(s)-1] != ']' {
 		return errors.New("Unknown JSON format (not ending ']')")
 	}
-	s = s[:len(s)-2]
+	s = s[:len(s)-1]
 
 	v := strings.Split(s, ",")
 	switch len(v) {
 	case 2:
 		lat, latprec := getLat(v[1])
 		if isErrorDeg(lat, latprec) {
-			err = errors.New("Error Degreee on JSON Lat")
+			err = fmt.Errorf("Error Degreee on JSON Lat %s", v[1])
 		}
 		lng, lngprec := getLng(v[0])
 		if isErrorDeg(lng, lngprec) {
-			err = errors.New("Error Degreee on JSON Lng")
+			err = fmt.Errorf("Error Degreee on JSON Lng %s", v[0])
 		}
 
 		*latlong = *NewLatLongAlt(lat, lng, latprec, lngprec, nil)
 	case 3:
 		lat, latprec := getLat(v[1])
 		if isErrorDeg(lat, latprec) {
-			err = errors.New("Error Degreee on JSON Lat")
+			err = fmt.Errorf("Error Degreee on JSON Lat %s", v[1])
 		}
 		lng, lngprec := getLng(v[0])
 		if isErrorDeg(lng, lngprec) {
-			err = errors.New("Error Degreee on JSON Lng")
+			err = fmt.Errorf("Error Degreee on JSON Lng %s", v[0])
 		}
 
 		*latlong = *NewLatLongAlt(lat, lng, latprec, lngprec, getAlt(v[2]))
