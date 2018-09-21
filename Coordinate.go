@@ -28,7 +28,7 @@ func (latlong *Coordinate) MarshalJSON() ([]byte, error) {
 	return []byte("[" + s + "]"), nil
 }
 
-// UnarshalJSON is a unmarshaler for JSON.
+// UnmarshalJSON is a unmarshaler for JSON.
 func (latlong *Coordinate) UnmarshalJSON(data []byte) (err error) {
 	var v []string
 
