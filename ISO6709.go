@@ -23,7 +23,7 @@ func NewLatLongISO6709(iso6709 string) (ll *Coordinate) {
 				case "Latitude":
 					latitude, latprec = getLat(part)
 				case "Longitude":
-					longitude, longprec = getLong(part)
+					longitude, longprec = getLng(part)
 				case "Altitude":
 					altitude = getAlt(part)
 				}

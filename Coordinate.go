@@ -1,7 +1,6 @@
 package latlong
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -30,25 +29,42 @@ func (latlong *Coordinate) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON is a unmarshaler for JSON.
 func (latlong *Coordinate) UnmarshalJSON(data []byte) (err error) {
-	var v []string
+	s := strings.TrimSpace(string(data))
 
-	err = json.Unmarshal(data, &v)
-	if err != nil {
-		return
+	if s[0] != '[' {
+		return errors.New("Unknown JSON format (not starting '[')")
 	}
+	s = s[1:]
 
+	if s[len(s)-1] != ']' {
+		return errors.New("Unknown JSON format (not ending ']')")
+	}
+	s = s[:len(s)-2]
+
+	v := strings.Split(s, ",")
 	switch len(v) {
 	case 2:
-		lat, latproc := getLat(v[1])
-		lng, lngproc := getLat(v[0])
+		lat, latprec := getLat(v[1])
+		if isErrorDeg(lat, latprec) {
+			err = errors.New("Error Degreee on JSON Lat")
+		}
+		lng, lngprec := getLng(v[0])
+		if isErrorDeg(lng, lngprec) {
+			err = errors.New("Error Degreee on JSON Lng")
+		}
 
-		latlong = NewLatLongAlt(lat, lng, latproc, lngproc, nil)
+		*latlong = *NewLatLongAlt(lat, lng, latprec, lngprec, nil)
 	case 3:
-		lat, latproc := getLat(v[1])
-		lng, lngproc := getLat(v[0])
-		alt := getAlt(v[2])
+		lat, latprec := getLat(v[1])
+		if isErrorDeg(lat, latprec) {
+			err = errors.New("Error Degreee on JSON Lat")
+		}
+		lng, lngprec := getLng(v[0])
+		if isErrorDeg(lng, lngprec) {
+			err = errors.New("Error Degreee on JSON Lng")
+		}
 
-		latlong = NewLatLongAlt(lat, lng, latproc, lngproc, alt)
+		*latlong = *NewLatLongAlt(lat, lng, latprec, lngprec, getAlt(v[2]))
 	default:
 		return errors.New("unknown JSON Coordinate format")
 	}
@@ -222,6 +238,14 @@ func (latlong Coordinate) PrecString() (s string) {
 	return
 }
 
+func isErrorDeg(deg float64, degprec float64) bool {
+	degerr, degprecerr := getErrorDeg()
+	if deg == degerr && degprec == degprecerr {
+		return true
+	}
+	return false
+}
+
 func getErrorDeg() (deg float64, degprec float64) {
 	deg = 0
 	degprec = 360
@@ -318,6 +342,7 @@ func getDegMinSec(part string, pos int) (deg float64, degprec float64) {
 }
 
 func getLat(part string) (latitude float64, latprec float64) {
+	part = strings.TrimSpace(part)
 	pos := strings.Index(part, ".")
 	if pos == -1 {
 		pos = len(part)
@@ -337,7 +362,8 @@ func getLat(part string) (latitude float64, latprec float64) {
 	return
 }
 
-func getLong(part string) (longitude float64, longprec float64) {
+func getLng(part string) (longitude float64, longprec float64) {
+	part = strings.TrimSpace(part)
 	pos := strings.Index(part, ".")
 	if pos == -1 {
 		pos = len(part)
@@ -358,6 +384,7 @@ func getLong(part string) (longitude float64, longprec float64) {
 }
 
 func getAlt(part string) (altitude *float64) {
+	part = strings.TrimSpace(part)
 	if a, er := strconv.ParseFloat(part, 64); er == nil {
 		altitude = &a
 	}
