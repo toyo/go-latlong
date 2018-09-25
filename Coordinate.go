@@ -119,7 +119,7 @@ func (latlong Coordinate) DistanceAngle(latlong1 *Coordinate) s1.Angle {
 
 // DistanceEarthKm in km at surface.
 func (latlong Coordinate) DistanceEarthKm(latlong1 *Coordinate) float64 {
-	return float64(latlong.DistanceAngle(latlong1) / 3.14 * 20037.5)
+	return AngleToEarthArcKm(latlong.DistanceAngle(latlong1))
 }
 
 var msgCatalog = map[string]struct {
