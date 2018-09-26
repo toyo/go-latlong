@@ -123,13 +123,8 @@ func (latlong Coordinate) DistanceAngle(latlong1 *Coordinate) s1.Angle {
 }
 
 // DistanceEarthKm in km at surface.
-<<<<<<< HEAD
 func (latlong Coordinate) DistanceEarthKm(latlong1 *Coordinate) Km {
 	return EarthArcFromAngle(latlong.DistanceAngle(latlong1))
-=======
-func (latlong Coordinate) DistanceEarthKm(latlong1 *Coordinate) float64 {
-	return AngleToEarthArcKm(latlong.DistanceAngle(latlong1))
->>>>>>> 8225b8a9cf64c05ac5bd833b939e11d9321bf41b
 }
 
 var msgCatalog = map[string]struct {
