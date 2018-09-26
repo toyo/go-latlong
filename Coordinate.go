@@ -102,6 +102,11 @@ func (latlong Coordinate) S2Point() s2.Point {
 	return s2.PointFromLatLng(latlong.S2LatLng())
 }
 
+// S2Cap is getter for s2.Cap
+func (latlong *Coordinate) S2Cap(radius s1.ChordAngle) s2.Cap {
+	return s2.CapFromCenterChordAngle(latlong.S2Point(), radius)
+}
+
 // Lat is getter for latitude
 func (latlong Coordinate) Lat() float64 {
 	return latlong.Center().Lat.Degrees()
@@ -118,8 +123,8 @@ func (latlong Coordinate) DistanceAngle(latlong1 *Coordinate) s1.Angle {
 }
 
 // DistanceEarthKm in km at surface.
-func (latlong Coordinate) DistanceEarthKm(latlong1 *Coordinate) float64 {
-	return float64(latlong.DistanceAngle(latlong1) / 3.14 * 20037.5)
+func (latlong Coordinate) DistanceEarthKm(latlong1 *Coordinate) Km {
+	return EarthArcFromAngle(latlong.DistanceAngle(latlong1))
 }
 
 var msgCatalog = map[string]struct {
