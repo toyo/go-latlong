@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/golang/geo/s2"
+	"googlemaps.github.io/maps"
 )
 
 // Coordinates is slice of LatLong
@@ -30,18 +31,26 @@ func NewLatLongsISO6709(str string) (ll *Coordinates, err error) {
 }
 
 // S2Polyline is getter for s2.Polyline ([]s2.Point).
-func (cds *Coordinates) S2Polyline() (ps s2.Polyline) {
-	for _, v := range *cds {
-		ps = append(ps, v.S2Point())
+func (cds Coordinates) S2Polyline() (ps s2.Polyline) {
+	for _, cd := range cds {
+		ps = append(ps, cd.S2Point())
 	}
 	return
 }
 
 // S2Loop is getter for s2.Loop.
-func (cds *Coordinates) S2Loop() *s2.Loop {
+func (cds Coordinates) S2Loop() *s2.Loop {
 	lo := s2.LoopFromPoints(cds.S2Polyline())
 	lo.Normalize() // if loop is not CCW but CW, change to CCW.
 	return lo
+}
+
+// MapsLatLng covert to google maps.
+func (cds Coordinates) MapsLatLng() (mlls []maps.LatLng) {
+	for _, cd := range cds {
+		mlls = append(mlls, cd.MapsLatLng())
+	}
+	return
 }
 
 func (cds *Coordinates) unset(i int) {

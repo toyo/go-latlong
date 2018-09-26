@@ -10,6 +10,7 @@ import (
 
 	"github.com/golang/geo/s1"
 	"github.com/golang/geo/s2"
+	"googlemaps.github.io/maps"
 )
 
 // Coordinate is Rectangle and Altitude.
@@ -243,6 +244,12 @@ func (latlong Coordinate) PrecString() (s string) {
 	return
 }
 
+func (latlong Coordinate) MapsLatLng() (mll maps.LatLng) {
+	mll.Lat = latlong.Lat()
+	mll.Lng = latlong.Lng()
+	return
+}
+
 func isErrorDeg(deg float64, degprec float64) bool {
 	degerr, degprecerr := getErrorDeg()
 	if deg == degerr && degprec == degprecerr {
@@ -353,7 +360,7 @@ func getLat(part string) (latitude float64, latprec float64) {
 		pos = len(part)
 	}
 
-	if pos < 2 {
+	if pos < 2 && false {
 		latitude, latprec = getErrorDeg()
 	} else if pos < 4 {
 		latitude, latprec = getDeg(part, pos)
@@ -374,7 +381,7 @@ func getLng(part string) (longitude float64, longprec float64) {
 		pos = len(part)
 	}
 
-	if pos < 3 {
+	if pos < 3 && false {
 		longitude, longprec = getErrorDeg()
 	} else if pos < 5 {
 		longitude, longprec = getDeg(part, pos)
