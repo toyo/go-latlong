@@ -104,8 +104,8 @@ func (latlong Coordinate) S2Point() s2.Point {
 }
 
 // S2Cap is getter for s2.Cap
-func (latlong *Coordinate) S2Cap(radius s1.ChordAngle) s2.Cap {
-	return s2.CapFromCenterChordAngle(latlong.S2Point(), radius)
+func (latlong *Coordinate) S2Cap(radius s1.Angle) s2.Cap {
+	return s2.CapFromCenterAngle(latlong.S2Point(), radius)
 }
 
 // Lat is getter for latitude
