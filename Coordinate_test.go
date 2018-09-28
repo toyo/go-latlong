@@ -9,26 +9,27 @@ import (
 )
 
 func TestString(t *testing.T) {
-	l := NewRectGridLocator("PM95UQ").Center()
+	ll := NewRectGridLocator("PM95UQ")
+	//ll := NewRectGridLocator("JJ00AA")
 
 	Config.Lang = "ja"
-	ls := l.String()
+	ls := ll.Center().String()
 	correctResponsels := "北緯35.7度、東経139.7度"
 	if ls != correctResponsels {
 		t.Errorf("expected %+v, was %+v", correctResponsels, ls)
-		t.Error(l.String())
-		t.Error(l.PrecString())
+		t.Error(ll.Center().String())
+		t.Error(ll.Center().PrecString())
 	}
 
-	lp := NewRectGridLocator("PM95UQ").PrecString()
+	lp := ll.PrecString()
 	correctResponselp := "緯度誤差0.041667度、経度誤差0.083333度"
 	if lp != correctResponselp {
 		t.Errorf("expected %+v, was %+v", correctResponselp, lp)
 	}
 
 	b := new(bytes.Buffer)
-	err := json.NewEncoder(b).Encode(&l)
-	correctResponseJSON := "[139.7,35.7]\n"
+	err := json.NewEncoder(b).Encode(&ll)
+	correctResponseJSON := "[[139.67,35.67],[139.75,35.67],[139.75,35.71],[139.67,35.71]]\n"
 	if err != nil {
 		t.Error(err)
 		return
@@ -36,6 +37,8 @@ func TestString(t *testing.T) {
 	JSON := b.String()
 	if JSON != correctResponseJSON {
 		t.Errorf("expected '%+v', was '%+v'", correctResponseJSON, JSON)
+		t.Error(ll.Center().String())
+		t.Error(ll.Center().PrecString())
 	}
 }
 

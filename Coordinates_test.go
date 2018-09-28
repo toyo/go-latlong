@@ -11,9 +11,9 @@ import (
 func TestNewLatLongAltsString(t *testing.T) {
 	//str := `+32.9+130.9-10000/`
 	//str := `+30.4402+130.2000/+30.4588+130.2200/+30.4545+130.2400/+30.4400+130.2545/+30.4200+130.2489/+30.4061+130.2400/+30.4037+130.2200/+30.4200+130.2056/+30.4398+130.2000/+30.4400+130.1998/+30.4402+130.2000/`
-	ll, err := NewLatLongsISO6709("+12.34+123.45+3776/+0123.4-01234.5-3776/-001234+0012345-12345/")
-	if err != nil {
-		t.Errorf("NewLatLongAltssISO6709 returned non nil error: %v", err)
+	ll := NewLatLongsISO6709("+12.34+123.45+3776/+0123.4-01234.5-3776/-001234+0012345-12345/")
+	if ll == nil {
+		t.Errorf("NewLatLongAltssISO6709 returned non nil error")
 	}
 
 	Config.Lang = "ja"
@@ -24,7 +24,7 @@ func TestNewLatLongAltsString(t *testing.T) {
 	}
 
 	b := new(bytes.Buffer)
-	err = json.NewEncoder(b).Encode(&ll)
+	err := json.NewEncoder(b).Encode(&ll)
 	correctResponseJSON := "[[123.45,12.34,3776],[-12.57,1.39,-3776],[1.396,-0.209,-12345]]\n"
 	if err != nil {
 		t.Error(err)
@@ -38,9 +38,9 @@ func TestNewLatLongAltsString(t *testing.T) {
 }
 
 func TestLatLongstring(t *testing.T) {
-	ll, err := NewLatLongsISO6709("+12+123/+12.3+123.4/+12.34+123.43/")
-	if err != nil {
-		t.Errorf("NewLatLongsISO6709 returned non nil error: %v", err)
+	ll := NewLatLongsISO6709("+12+123/+12.3+123.4/+12.34+123.43/")
+	if ll == nil {
+		t.Errorf("NewLatLongsISO6709 returned nil error")
 	}
 
 	Config.Lang = "ja"
@@ -56,9 +56,9 @@ func TestLatLongstring(t *testing.T) {
 }
 
 func TestPolygon(t *testing.T) {
-	cs, err := NewLatLongsISO6709("+31.9388+130.8800/+31.9388+130.9000/+31.9372+130.9200/+31.9312+130.9400/+31.9265+130.9600/+31.9200+130.9783/+31.9000+130.9682/+31.8958+130.9600/+31.8909+130.9400/+31.8829+130.9200/+31.8812+130.9000/+31.8812+130.8800/+31.9000+130.8612/+31.9200+130.8612/+31.9388+130.8800/")
-	if err != nil {
-		t.Errorf("%v", err)
+	cs := NewLatLongsISO6709("+31.9388+130.8800/+31.9388+130.9000/+31.9372+130.9200/+31.9312+130.9400/+31.9265+130.9600/+31.9200+130.9783/+31.9000+130.9682/+31.8958+130.9600/+31.8909+130.9400/+31.8829+130.9200/+31.8812+130.9000/+31.8812+130.8800/+31.9000+130.8612/+31.9200+130.8612/+31.9388+130.8800/")
+	if cs == nil {
+		t.Errorf("Error on TestPolygon")
 	}
 
 	lo := cs.S2Loop()

@@ -1,6 +1,7 @@
 package latlong
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"math"
@@ -13,6 +14,33 @@ import (
 // Rect is rectangle of latlng.
 type Rect struct {
 	s2.Rect
+}
+
+// MarshalJSON is a marshaler for JSON.
+func (rect *Rect) MarshalJSON() (bb []byte, e error) {
+	type LatLngs []LatLng
+
+	v := []LatLng{
+		LatLng{LatLng: rect.Vertex(0), latprec: rect.Rect.Size().Lat.Degrees() / 10, lngprec: rect.Rect.Size().Lng.Degrees() / 10},
+		LatLng{LatLng: rect.Vertex(1), latprec: rect.Rect.Size().Lat.Degrees() / 10, lngprec: rect.Rect.Size().Lng.Degrees() / 10},
+		LatLng{LatLng: rect.Vertex(2), latprec: rect.Rect.Size().Lat.Degrees() / 10, lngprec: rect.Rect.Size().Lng.Degrees() / 10},
+		LatLng{LatLng: rect.Vertex(3), latprec: rect.Rect.Size().Lat.Degrees() / 10, lngprec: rect.Rect.Size().Lng.Degrees() / 10},
+	}
+
+	bs := make([][]byte, 0)
+
+	for i := range v {
+		b, e := v[i].MarshalJSON()
+		if e != nil {
+			break
+		}
+		bs = append(bs, b)
+	}
+
+	bb = append(bb, '[')
+	bb = append(bb, bytes.Join(bs, []byte(","))...)
+	bb = append(bb, ']')
+	return bb, e
 }
 
 // NewRect is from latitude, longitude and altitude.
@@ -72,7 +100,7 @@ loop:
 
 // Center returns center LatLng.
 func (latlong Rect) Center() *LatLng {
-	return &LatLng{LatLng: latlong.Rect.Center(), latprec: latlong.Rect.Size().Lat.Degrees() / 2, lngprec: latlong.Rect.Size().Lng.Degrees() / 2}
+	return &LatLng{LatLng: latlong.Rect.Center(), latprec: latlong.Rect.Size().Lat.Degrees(), lngprec: latlong.Rect.Size().Lng.Degrees()}
 }
 
 // PrecString is Precision String()

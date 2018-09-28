@@ -14,20 +14,19 @@ import (
 type Coordinates []*Coordinate
 
 // NewLatLongsISO6709 is from ISO6709 latlongs.
-func NewLatLongsISO6709(str string) (ll *Coordinates, err error) {
-	ll = new(Coordinates)
+func NewLatLongsISO6709(str string) *Coordinates {
+	ll := new(Coordinates)
 	for _, s := range strings.Split(str, "/") {
 		if s != "" {
 			l := NewLatLongISO6709(s)
-			if err == nil {
+			if l != nil {
 				*ll = append(*ll, l)
 			} else {
-				return
+				return nil
 			}
 		}
 	}
-	err = nil
-	return
+	return ll
 }
 
 // S2Polyline is getter for s2.Polyline ([]s2.Point).
@@ -97,26 +96,25 @@ func (cds Coordinates) String() string {
 }
 
 // UnmarshalXML is Unmarshal function but NOT WORK.
-func (cds *Coordinates) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error) {
-	var token xml.Token
+func (cds *Coordinates) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 
-	token, err = d.Token()
+	token, err := d.Token()
 	if err != nil {
-		return
+		return err
 	}
 	if token == io.EOF {
 		err = errors.New("Unexpected EOF on LatLongs")
-		return
+		return err
 	}
 
 	switch t := token.(type) {
 	case xml.CharData:
-		var b *Coordinates
-		b, err = NewLatLongsISO6709(string(t))
-		*cds = *b
-		return
+		if b := NewLatLongsISO6709(string(t)); b != nil {
+			*cds = *b
+			return nil
+		}
+		return errors.New("Unexpected CharData on Coordinates UnmarshalXML")
 	default:
-		err = errors.New("Unexpected Token on LatLongs")
-		return
+		return errors.New("Unexpected Token on LatLongs")
 	}
 }

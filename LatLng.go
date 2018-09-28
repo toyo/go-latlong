@@ -25,6 +25,15 @@ func (latlong *LatLng) MarshalJSON() ([]byte, error) {
 	return []byte("[" + s + "]"), nil
 }
 
+// UnmarshalJSON is a unmarshaler for JSON.
+func (latlong *LatLng) UnmarshalJSON(data []byte) (err error) {
+	var c Coordinate
+
+	err = c.UnmarshalJSON(data)
+	latlong = &c.LatLng
+	return
+}
+
 // S2LatLng is getter for s2.LatLng
 func (latlong LatLng) S2LatLng() s2.LatLng {
 	return latlong.LatLng
@@ -33,11 +42,6 @@ func (latlong LatLng) S2LatLng() s2.LatLng {
 // S2Point is getter for s2.Point
 func (latlong LatLng) S2Point() s2.Point {
 	return s2.PointFromLatLng(latlong.S2LatLng())
-}
-
-// S2Cap is getter for s2.Cap
-func (latlong *LatLng) S2Cap(radius s1.Angle) s2.Cap {
-	return s2.CapFromCenterAngle(latlong.S2Point(), radius)
 }
 
 // DistanceAngle in radian.
