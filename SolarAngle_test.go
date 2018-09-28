@@ -6,7 +6,7 @@ import (
 )
 
 func TestSolarAngle(t *testing.T) {
-	l := NewLatLongGridLocator("PM95UQ")
+	l := NewRectGridLocator("PM95UQ").Center()
 
 	sa := l.SolarAngle(time.Unix(0, 0))
 	correctResponsesa := 70.38745256769428

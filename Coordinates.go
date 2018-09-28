@@ -68,8 +68,8 @@ func (cds *Coordinates) Uniq() {
 		ls := *cds
 
 		l := len(ls)
-		if ls[l-2].Intersects(ls[l-1].Rect) { //Same point, different precision
-			if ls[l-2].Area() < ls[l-1].Area() {
+		if ls[l-2].Lat == ls[l-1].Lat && ls[l-2].Lng == ls[l-1].Lng { //Same point, different precision
+			if ls[l-2].PrecisionArea() < ls[l-1].PrecisionArea() {
 				ls.unset(l - 1)
 				ls.Uniq()
 			} else {

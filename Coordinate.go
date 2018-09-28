@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -13,10 +14,23 @@ import (
 	"googlemaps.github.io/maps"
 )
 
-// Coordinate is Rectangle and Altitude.
+// LatLng is Latitude & Longitude with precision.
+type LatLng struct {
+	s2.LatLng
+	latprec float64
+	lngprec float64
+}
+
+// Coordinate is LatLng and Altitude.
 type Coordinate struct {
-	s2.Rect
+	LatLng
 	alt *float64 // altitude
+}
+
+// MarshalJSON is a marshaler for JSON.
+func (latlong *LatLng) MarshalJSON() ([]byte, error) {
+	s := latlong.lngString() + "," + latlong.latString()
+	return []byte("[" + s + "]"), nil
 }
 
 // MarshalJSON is a marshaler for JSON.
@@ -76,11 +90,40 @@ func (latlong *Coordinate) UnmarshalJSON(data []byte) (err error) {
 // NewLatLongAlt is from latitude, longitude and altitude.
 func NewLatLongAlt(latitude, longitude, latprec, longprec float64, altitude *float64) *Coordinate {
 	latlongalt := new(Coordinate)
-	latlongalt.Rect = s2.RectFromCenterSize(
-		s2.LatLngFromDegrees(latitude, longitude),
-		s2.LatLngFromDegrees(latprec, longprec))
+	latlongalt.LatLng.LatLng = s2.LatLngFromDegrees(latitude, longitude)
+	latlongalt.latprec = latprec
+	latlongalt.lngprec = longprec
 	latlongalt.alt = altitude
 	return latlongalt
+}
+
+// NewLatLongISO6709 is from ISO6709 string
+func NewLatLongISO6709(iso6709 string) *Coordinate {
+	re := regexp.MustCompile(`(?P<Latitude>[\+-][\d.]+)(?P<Longitude>[\+-][\d.]+)(?P<Altitude>[\+-][\d.]+)?`)
+
+	if re.MatchString(iso6709) {
+		match := re.FindStringSubmatch(iso6709)
+
+		var latitude, longitude, latprec, longprec float64
+		var altitude *float64
+
+		for i, name := range re.SubexpNames() {
+			if i == 0 || name == "" {
+				continue
+			}
+
+			switch name {
+			case "Latitude":
+				latitude, latprec = getLat(match[i])
+			case "Longitude":
+				longitude, longprec = getLng(match[i])
+			case "Altitude":
+				altitude = getAlt(match[i])
+			}
+		}
+		return NewLatLongAlt(latitude, longitude, latprec, longprec, altitude)
+	}
+	return nil
 }
 
 // Scan is for fmt.Scanner
@@ -94,37 +137,27 @@ func (latlong *Coordinate) Scan(state fmt.ScanState, verb rune) (err error) {
 }
 
 // S2LatLng is getter for s2.LatLng
-func (latlong Coordinate) S2LatLng() s2.LatLng {
-	return latlong.Center()
+func (latlong LatLng) S2LatLng() s2.LatLng {
+	return latlong.LatLng
 }
 
 // S2Point is getter for s2.Point
-func (latlong Coordinate) S2Point() s2.Point {
+func (latlong LatLng) S2Point() s2.Point {
 	return s2.PointFromLatLng(latlong.S2LatLng())
 }
 
 // S2Cap is getter for s2.Cap
-func (latlong *Coordinate) S2Cap(radius s1.Angle) s2.Cap {
+func (latlong *LatLng) S2Cap(radius s1.Angle) s2.Cap {
 	return s2.CapFromCenterAngle(latlong.S2Point(), radius)
 }
 
-// Lat is getter for latitude
-func (latlong Coordinate) Lat() float64 {
-	return latlong.Center().Lat.Degrees()
-}
-
-// Lng is getter for longitude
-func (latlong Coordinate) Lng() float64 {
-	return latlong.Center().Lng.Degrees()
-}
-
 // DistanceAngle in radian.
-func (latlong Coordinate) DistanceAngle(latlong1 *Coordinate) s1.Angle {
-	return latlong.Center().Distance(latlong1.Center())
+func (latlong *LatLng) DistanceAngle(latlong1 *LatLng) s1.Angle {
+	return latlong.Distance(latlong1.LatLng)
 }
 
 // DistanceEarthKm in km at surface.
-func (latlong Coordinate) DistanceEarthKm(latlong1 *Coordinate) Km {
+func (latlong *LatLng) DistanceEarthKm(latlong1 *LatLng) Km {
 	return EarthArcFromAngle(latlong.DistanceAngle(latlong1))
 }
 
@@ -158,13 +191,13 @@ var msgCatalog = map[string]struct {
 }
 
 // LatString is string getter for latitude
-func (latlong Coordinate) LatString() (s string) {
-	latprec := int(-math.Log10(latlong.Rect.Size().Lat.Degrees()))
+func (latlong LatLng) LatString() (s string) {
+	latprec := int(-math.Log10(latlong.latprec))
 	if latprec < 0 {
 		latprec = 0
 	}
 
-	lat := latlong.Lat()
+	lat := latlong.Lat.Degrees()
 	if lat >= 0 {
 		s += fmt.Sprintf(msgCatalog[Config.Lang].latN, strconv.FormatFloat(lat, 'f', latprec, 64))
 	} else {
@@ -174,22 +207,22 @@ func (latlong Coordinate) LatString() (s string) {
 }
 
 // latString is string getter for latitude
-func (latlong Coordinate) latString() string {
-	latprec := int(-math.Log10(latlong.Rect.Size().Lat.Degrees()))
+func (latlong LatLng) latString() string {
+	latprec := int(-math.Log10(latlong.latprec))
 	if latprec < 0 {
 		latprec = 0
 	}
-	return strconv.FormatFloat(latlong.Lat(), 'f', latprec, 64)
+	return strconv.FormatFloat(latlong.Lat.Degrees(), 'f', latprec, 64)
 }
 
 // LngString is string getter for longitude
-func (latlong Coordinate) LngString() (s string) {
-	lngprec := int(-math.Log10(latlong.Rect.Size().Lng.Degrees()))
+func (latlong LatLng) LngString() (s string) {
+	lngprec := int(-math.Log10(latlong.lngprec))
 	if lngprec < 0 {
 		lngprec = 0
 	}
 
-	lng := latlong.Lng()
+	lng := latlong.Lng.Degrees()
 	if lng >= 0 {
 		s += fmt.Sprintf(msgCatalog[Config.Lang].lngE, strconv.FormatFloat(lng, 'f', lngprec, 64))
 	} else {
@@ -199,13 +232,13 @@ func (latlong Coordinate) LngString() (s string) {
 }
 
 // lngString is string getter for longitude
-func (latlong Coordinate) lngString() string {
-	lngprec := int(-math.Log10(latlong.Rect.Size().Lng.Degrees()))
+func (latlong LatLng) lngString() string {
+	lngprec := int(-math.Log10(latlong.lngprec))
 	if lngprec < 0 {
 		lngprec = 0
 	}
 
-	return strconv.FormatFloat(latlong.Lng(), 'f', lngprec, 64)
+	return strconv.FormatFloat(latlong.Lng.Degrees(), 'f', lngprec, 64)
 }
 
 // AltString is string getter for altitude
@@ -230,24 +263,32 @@ func (latlong Coordinate) altString() string {
 	return ""
 }
 
+func (latlong LatLng) String() string {
+	return latlong.LatString() + latlong.LngString()
+}
+
 func (latlong Coordinate) String() string {
 	return latlong.LatString() + latlong.LngString() + latlong.AltString()
 }
 
+// PrecisionArea returns area size of precicion.
+func (latlong LatLng) PrecisionArea() float64 {
+	return latlong.latprec * latlong.lngprec
+}
+
 // PrecString is Precision String()
-func (latlong Coordinate) PrecString() (s string) {
+func (latlong LatLng) PrecString() (s string) {
 	if Config.Lang == "ja" {
-		s = fmt.Sprintf("緯度誤差%f度、経度誤差%f度", latlong.Size().Lat.Degrees(), latlong.Size().Lng.Degrees())
+		s = fmt.Sprintf("緯度誤差%f度、経度誤差%f度", latlong.latprec, latlong.lngprec)
 	} else {
-		s = fmt.Sprintf("lat. error %fdeg., long. error %fdeg.", latlong.Size().Lat.Degrees(), latlong.Size().Lng.Degrees())
+		s = fmt.Sprintf("lat. error %fdeg., long. error %fdeg.", latlong.latprec, latlong.lngprec)
 	}
 	return
 }
 
-func (latlong Coordinate) MapsLatLng() (mll maps.LatLng) {
-	mll.Lat = latlong.Lat()
-	mll.Lng = latlong.Lng()
-	return
+// MapsLatLng return maps.LatLng ( "googlemaps.github.io/maps" )
+func (latlong LatLng) MapsLatLng() maps.LatLng {
+	return maps.LatLng{Lat: latlong.Lat.Degrees(), Lng: latlong.Lng.Degrees()}
 }
 
 func isErrorDeg(deg float64, degprec float64) bool {
