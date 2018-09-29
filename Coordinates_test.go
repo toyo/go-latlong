@@ -18,7 +18,7 @@ func TestNewLatLongAltsString(t *testing.T) {
 
 	Config.Lang = "ja"
 	lls := ll.String()
-	correctResponsells := "北緯12.34度、東経123.45度、標高3776m,北緯1.39度、西経12.57度、ごく浅く,南緯0.209度、東経1.396度、深さ12km"
+	correctResponsells := "北緯12.34度、東経123.45度、標高3776m,北緯1.390度、西経12.575度、ごく浅く,南緯0.2094度、東経1.3958度、深さ12km"
 	if lls != correctResponsells {
 		t.Errorf("expected %+v, was %+v", correctResponsells, lls)
 	}
@@ -45,7 +45,7 @@ func TestLatLongstring(t *testing.T) {
 
 	Config.Lang = "ja"
 	lls := ll.String()
-	correctResponsells := "北緯12度、東経123度,北緯12度、東経123度,北緯12.34度、東経123.43度"
+	correctResponsells := "北緯12度、東経123度,北緯12.3度、東経123.4度,北緯12.34度、東経123.43度"
 	if lls != correctResponsells {
 		t.Errorf("expected %+v, was %+v", correctResponsells, lls)
 		for _, l := range *ll {

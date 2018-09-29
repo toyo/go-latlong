@@ -72,12 +72,12 @@ func (latlong *Coordinate) UnmarshalJSON(data []byte) (err error) {
 
 // NewLatLongAlt is from latitude, longitude and altitude.
 func NewLatLongAlt(latitude, longitude, latprec, longprec float64, altitude *float64) *Coordinate {
-	latlongalt := new(Coordinate)
+	var latlongalt Coordinate
 	latlongalt.LatLng.LatLng = s2.LatLngFromDegrees(latitude, longitude)
 	latlongalt.latprec = latprec
 	latlongalt.lngprec = longprec
 	latlongalt.alt = altitude
-	return latlongalt
+	return &latlongalt
 }
 
 // NewLatLongISO6709 is from ISO6709 string
@@ -127,39 +127,28 @@ var msgCatalog = map[string]struct {
 	elv    string
 	ground string
 	dep    string
+	comma  string
 }{
 	"ja": {
-		latN:   "北緯%s度、",
-		latS:   "南緯%s度、",
+		latN:   "北緯%s度",
+		latS:   "南緯%s度",
 		lngE:   "東経%s度",
 		lngW:   "西経%s度",
-		elv:    "、標高%.0fm",
-		ground: "、ごく浅く",
-		dep:    "、深さ%.0fkm",
+		elv:    "標高%.0fm",
+		ground: "ごく浅く",
+		dep:    "深さ%.0fkm",
+		comma:  "、",
 	},
 	"en": {
-		latN:   "lat.%sN, ",
-		latS:   "lat.%sS, ",
+		latN:   "lat.%sN",
+		latS:   "lat.%sS",
 		lngE:   "long.%sE",
 		lngW:   "long.%sW",
-		elv:    ", elv.%.0fm",
-		ground: ", shallow ground",
-		dep:    ", dep.%.0fkm",
+		elv:    "elv.%.0fm",
+		ground: "shallow ground",
+		dep:    "dep.%.0fkm",
+		comma:  ", ",
 	},
-}
-
-// AltString is string getter for altitude
-func (latlong Coordinate) AltString() (s string) {
-	if latlong.alt != nil {
-		if *latlong.alt > 0 {
-			s += fmt.Sprintf(msgCatalog[Config.Lang].elv, *latlong.alt)
-		} else if *latlong.alt > -10000 {
-			s += fmt.Sprintf(msgCatalog[Config.Lang].ground)
-		} else {
-			s += fmt.Sprintf(msgCatalog[Config.Lang].dep, *latlong.alt/(-1000))
-		}
-	}
-	return
 }
 
 // AltString is string getter for altitude
@@ -171,7 +160,19 @@ func (latlong Coordinate) altString() string {
 }
 
 func (latlong Coordinate) String() string {
-	return latlong.LatString() + latlong.LngString() + latlong.AltString()
+	var ss []string
+	ss = append(ss, latlong.LatString())
+	ss = append(ss, latlong.LngString())
+	if latlong.alt != nil {
+		if *latlong.alt > 0 {
+			ss = append(ss, fmt.Sprintf(msgCatalog[Config.Lang].elv, *latlong.alt))
+		} else if *latlong.alt > -10000 {
+			ss = append(ss, fmt.Sprintf(msgCatalog[Config.Lang].ground))
+		} else {
+			ss = append(ss, fmt.Sprintf(msgCatalog[Config.Lang].dep, *latlong.alt/(-1000)))
+		}
+	}
+	return strings.Join(ss, msgCatalog[Config.Lang].comma)
 }
 
 func getAlt(part string) (altitude *float64) {

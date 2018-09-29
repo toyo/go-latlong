@@ -15,18 +15,18 @@ type Coordinates []*Coordinate
 
 // NewLatLongsISO6709 is from ISO6709 latlongs.
 func NewLatLongsISO6709(str string) *Coordinates {
-	ll := new(Coordinates)
+	var ll Coordinates
 	for _, s := range strings.Split(str, "/") {
 		if s != "" {
 			l := NewLatLongISO6709(s)
 			if l != nil {
-				*ll = append(*ll, l)
+				ll = append(ll, l)
 			} else {
 				return nil
 			}
 		}
 	}
-	return ll
+	return &ll
 }
 
 // S2Polyline is getter for s2.Polyline ([]s2.Point).

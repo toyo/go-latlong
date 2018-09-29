@@ -32,5 +32,5 @@ func EarthArcFromAngle(angle s1.Angle) Km {
 }
 
 func (km Km) String() string {
-	return strconv.FormatFloat(float64(km), 'f', 0, 64)
+	return strconv.FormatFloat(float64(km), 'f', 0, 64) + "km"
 }

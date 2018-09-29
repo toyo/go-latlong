@@ -14,7 +14,7 @@ func TestString(t *testing.T) {
 
 	Config.Lang = "ja"
 	ls := ll.Center().String()
-	correctResponsels := "北緯35.7度、東経139.7度"
+	correctResponsels := "北緯35.69度、東経139.71度"
 	if ls != correctResponsels {
 		t.Errorf("expected %+v, was %+v", correctResponsels, ls)
 		t.Error(ll.Center().String())

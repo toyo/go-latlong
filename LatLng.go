@@ -56,7 +56,7 @@ func (latlong *LatLng) DistanceEarthKm(latlong1 *LatLng) Km {
 
 // LatString is string getter for latitude
 func (latlong LatLng) LatString() (s string) {
-	latprec := int(-math.Log10(latlong.latprec))
+	latprec := int(math.Ceil(-math.Log10(latlong.latprec)))
 	if latprec < 0 {
 		latprec = 0
 	}
@@ -67,6 +67,7 @@ func (latlong LatLng) LatString() (s string) {
 	} else {
 		s += fmt.Sprintf(msgCatalog[Config.Lang].latS, strconv.FormatFloat(-lat, 'f', latprec, 64))
 	}
+	//s += "精度" + strconv.FormatFloat(latlong.latprec, 'f', 5, 64)
 	return
 }
 
@@ -81,7 +82,7 @@ func (latlong LatLng) latString() string {
 
 // LngString is string getter for longitude
 func (latlong LatLng) LngString() (s string) {
-	lngprec := int(-math.Log10(latlong.lngprec))
+	lngprec := int(math.Ceil(-math.Log10(latlong.lngprec)))
 	if lngprec < 0 {
 		lngprec = 0
 	}
@@ -92,6 +93,7 @@ func (latlong LatLng) LngString() (s string) {
 	} else {
 		s += fmt.Sprintf(msgCatalog[Config.Lang].lngW, strconv.FormatFloat(-lng, 'f', lngprec, 64))
 	}
+	//s += "精度" + strconv.FormatFloat(latlong.lngprec, 'f', 5, 64)
 	return
 }
 
@@ -106,7 +108,7 @@ func (latlong LatLng) lngString() string {
 }
 
 func (latlong LatLng) String() string {
-	return latlong.LatString() + latlong.LngString()
+	return latlong.LatString() + msgCatalog[Config.Lang].comma + latlong.LngString()
 }
 
 // PrecisionArea returns area size of precicion.
