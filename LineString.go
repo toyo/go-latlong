@@ -12,10 +12,10 @@ import (
 	"googlemaps.github.io/maps"
 )
 
-// Coordinates is slice of LatLong
+// LineString is slice of LatLong
 type LineString []*LatLng
 
-// S2Polyline is getter for s2.Polyline ([]s2.Point).
+// S2Region is getter for s2.Polyline ([]s2.Point).
 func (cds LineString) S2Region() *s2.Polyline {
 	var ps s2.Polyline
 	for _, cd := range cds {

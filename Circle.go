@@ -11,7 +11,7 @@ type Circle struct {
 	s1.ChordAngle
 }
 
-// NewCircle is constuctor for Cap
+// NewCircle is constuctor for Circle
 func NewCircle(latlng LatLng, km Km) *Circle {
 	circle := Circle{
 		LatLng:     latlng,
@@ -19,6 +19,17 @@ func NewCircle(latlng LatLng, km Km) *Circle {
 	}
 	return &circle
 }
+
+// NewPointCircle is constructor for Circle with radius = 0
+func NewPointCircle(latlng LatLng) *Circle {
+	circle := Circle{
+		LatLng:     latlng,
+		ChordAngle: 0,
+	}
+	return &circle
+}
+
+// NewEmptyCircle is constructor for Circle with empty.
 func NewEmptyCircle() *Circle {
 	circle := Circle{
 		LatLng:     *NewLatLng(0, 0, 0, 0),
@@ -27,6 +38,7 @@ func NewEmptyCircle() *Circle {
 	return &circle
 }
 
+// S2Region is getter for s2.S2Region.
 func (c *Circle) S2Region() *s2.Cap {
 	cap := s2.CapFromCenterChordAngle(s2.PointFromLatLng(c.LatLng.LatLng), c.ChordAngle)
 	return &cap

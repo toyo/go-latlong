@@ -37,7 +37,7 @@ func TestPolygon1(t *testing.T) {
 	}
 
 	if !answer.Equal(ISO6709.S2Region()) {
-		t.Errorf("TestLineString %#v", ISO6709.S2Region())
+		t.Errorf("TestLineString %#v", ISO6709.S2Region().Vertices())
 	}
 
 	if ISO6709.S2Region().ContainsPoint(s2.PointFromLatLng(s2.LatLngFromDegrees(31.93, 130.90))) != true {
