@@ -15,8 +15,8 @@ import (
 // LatLng is Latitude & Longitude with precision.
 type LatLng struct {
 	s2.LatLng
-	latprec float64
-	lngprec float64
+	latprec s1.Angle
+	lngprec s1.Angle
 }
 
 // MarshalJSON is a marshaler for JSON.
@@ -56,7 +56,7 @@ func (latlong *LatLng) DistanceEarthKm(latlong1 *LatLng) Km {
 
 // LatString is string getter for latitude
 func (latlong LatLng) LatString() (s string) {
-	latprec := int(math.Ceil(-math.Log10(latlong.latprec)))
+	latprec := int(math.Ceil(-math.Log10(latlong.latprec.Degrees())))
 	if latprec < 0 {
 		latprec = 0
 	}
@@ -73,7 +73,7 @@ func (latlong LatLng) LatString() (s string) {
 
 // latString is string getter for latitude
 func (latlong LatLng) latString() string {
-	latprec := int(-math.Log10(latlong.latprec))
+	latprec := int(-math.Log10(latlong.latprec.Degrees()))
 	if latprec < 0 {
 		latprec = 0
 	}
@@ -82,7 +82,7 @@ func (latlong LatLng) latString() string {
 
 // LngString is string getter for longitude
 func (latlong LatLng) LngString() (s string) {
-	lngprec := int(math.Ceil(-math.Log10(latlong.lngprec)))
+	lngprec := int(math.Ceil(-math.Log10(latlong.lngprec.Degrees())))
 	if lngprec < 0 {
 		lngprec = 0
 	}
@@ -99,7 +99,7 @@ func (latlong LatLng) LngString() (s string) {
 
 // lngString is string getter for longitude
 func (latlong LatLng) lngString() string {
-	lngprec := int(-math.Log10(latlong.lngprec))
+	lngprec := int(-math.Log10(latlong.lngprec.Degrees()))
 	if lngprec < 0 {
 		lngprec = 0
 	}
@@ -113,7 +113,7 @@ func (latlong LatLng) String() string {
 
 // PrecisionArea returns area size of precicion.
 func (latlong LatLng) PrecisionArea() float64 {
-	return latlong.latprec * latlong.lngprec
+	return latlong.latprec.Degrees() * latlong.lngprec.Degrees()
 }
 
 // PrecString is Precision String()

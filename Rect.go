@@ -21,10 +21,10 @@ func (rect *Rect) MarshalJSON() (bb []byte, e error) {
 	type LatLngs []LatLng
 
 	v := []LatLng{
-		LatLng{LatLng: rect.Vertex(0), latprec: rect.Rect.Size().Lat.Degrees() / 10, lngprec: rect.Rect.Size().Lng.Degrees() / 10},
-		LatLng{LatLng: rect.Vertex(1), latprec: rect.Rect.Size().Lat.Degrees() / 10, lngprec: rect.Rect.Size().Lng.Degrees() / 10},
-		LatLng{LatLng: rect.Vertex(2), latprec: rect.Rect.Size().Lat.Degrees() / 10, lngprec: rect.Rect.Size().Lng.Degrees() / 10},
-		LatLng{LatLng: rect.Vertex(3), latprec: rect.Rect.Size().Lat.Degrees() / 10, lngprec: rect.Rect.Size().Lng.Degrees() / 10},
+		LatLng{LatLng: rect.Vertex(0), latprec: rect.Rect.Size().Lat / 10, lngprec: rect.Rect.Size().Lng / 10},
+		LatLng{LatLng: rect.Vertex(1), latprec: rect.Rect.Size().Lat / 10, lngprec: rect.Rect.Size().Lng / 10},
+		LatLng{LatLng: rect.Vertex(2), latprec: rect.Rect.Size().Lat / 10, lngprec: rect.Rect.Size().Lng / 10},
+		LatLng{LatLng: rect.Vertex(3), latprec: rect.Rect.Size().Lat / 10, lngprec: rect.Rect.Size().Lng / 10},
 	}
 
 	bs := make([][]byte, 0)
@@ -99,29 +99,29 @@ loop:
 }
 
 // Center returns center LatLng.
-func (latlong Rect) Center() *LatLng {
-	return &LatLng{LatLng: latlong.Rect.Center(), latprec: latlong.Rect.Size().Lat.Degrees(), lngprec: latlong.Rect.Size().Lng.Degrees()}
+func (rect Rect) Center() *LatLng {
+	return &LatLng{LatLng: rect.Rect.Center(), latprec: rect.Rect.Size().Lat, lngprec: rect.Rect.Size().Lng}
 }
 
 // PrecString is Precision String()
-func (latlong Rect) PrecString() (s string) {
+func (rect Rect) PrecString() (s string) {
 	if Config.Lang == "ja" {
-		s = fmt.Sprintf("緯度誤差%f度、経度誤差%f度", latlong.Size().Lat.Degrees(), latlong.Size().Lng.Degrees())
+		s = fmt.Sprintf("緯度誤差%f度、経度誤差%f度", rect.Size().Lat.Degrees(), rect.Size().Lng.Degrees())
 	} else {
-		s = fmt.Sprintf("lat. error %fdeg., long. error %fdeg.", latlong.Size().Lat.Degrees(), latlong.Size().Lng.Degrees())
+		s = fmt.Sprintf("lat. error %fdeg., long. error %fdeg.", rect.Size().Lat.Degrees(), rect.Size().Lng.Degrees())
 	}
 	return
 }
 
 // GridLocator is from Grid Locator.
 // https://en.wikipedia.org/wiki/Maidenhead_Locator_System
-func (latlong *Rect) GridLocator() string {
+func (rect *Rect) GridLocator() string {
 	const floaterr = 1 + 1E-11
 
 	var gl []rune
 
-	latitude := latlong.Center().Lat.Degrees() + 90
-	longitude := latlong.Center().Lng.Degrees() + 180
+	latitude := rect.Center().Lat.Degrees() + 90
+	longitude := rect.Center().Lng.Degrees() + 180
 
 	latprec := float64(10) * 24
 	lonprec := float64(20) * 24
@@ -131,7 +131,7 @@ loop:
 		switch i % 4 {
 		case 0:
 			lonprec /= 24
-			if lonprec*floaterr < latlong.Size().Lng.Degrees() {
+			if lonprec*floaterr < rect.Size().Lng.Degrees() {
 				//fmt.Printf("lon %.15f, %.15f", lonprec, latlong.Size().Lng.Degrees())
 				break loop
 			}
@@ -140,7 +140,7 @@ loop:
 			longitude -= c * lonprec
 		case 1:
 			latprec /= 24
-			if latprec*floaterr < latlong.Size().Lat.Degrees() {
+			if latprec*floaterr < rect.Size().Lat.Degrees() {
 				//fmt.Printf("lat %.15f, %.15f", latprec, latlong.Size().Lat.Degrees())
 				break loop
 			}
@@ -149,7 +149,7 @@ loop:
 			latitude -= c * latprec
 		case 2:
 			lonprec /= 10
-			if lonprec*floaterr < latlong.Size().Lng.Degrees() {
+			if lonprec*floaterr < rect.Size().Lng.Degrees() {
 				//fmt.Printf("lon %.15f, %.15f", lonprec, latlong.Size().Lng.Degrees())
 				break loop
 			}
@@ -159,7 +159,7 @@ loop:
 
 		case 3:
 			latprec /= 10
-			if latprec*floaterr < latlong.Size().Lat.Degrees() {
+			if latprec*floaterr < rect.Size().Lat.Degrees() {
 				//fmt.Printf("lat %.15f, %.15f", latprec, latlong.Size().Lat.Degrees())
 				break loop
 			}
@@ -187,26 +187,26 @@ func NewRectGeoHash(geoHash string) (latlong *Rect, err error) {
 	return
 }
 
-func (latlong *Rect) geoHash(precision int) string {
-	return geohash.EncodeWithPrecision(latlong.Center().Lat.Degrees(), latlong.Center().Lng.Degrees(), precision)
+func (rect *Rect) geoHash(precision int) string {
+	return geohash.EncodeWithPrecision(rect.Center().Lat.Degrees(), rect.Center().Lng.Degrees(), precision)
 }
 
 // GeoHash5 returns GeoHash string.
-func (latlong *Rect) GeoHash5() string {
-	return latlong.geoHash(5)
+func (rect *Rect) GeoHash5() string {
+	return rect.geoHash(5)
 }
 
 // GeoHash6 returns GeoHash string.
-func (latlong *Rect) GeoHash6() string {
-	return latlong.geoHash(6)
+func (rect *Rect) GeoHash6() string {
+	return rect.geoHash(6)
 }
 
 // GeoHash returns GeoHash string.
-func (latlong *Rect) GeoHash() string {
+func (rect *Rect) GeoHash() string {
 	const floaterr = 1 + 5E-10
 
-	geohashlatbits := -math.Log2(latlong.Size().Lat.Degrees()/45) + 2 // div by 180 = 45 * 2^2
-	geohashlngbits := -math.Log2(latlong.Size().Lng.Degrees()/45) + 3 // div by 360 = 45 * 2^3
+	geohashlatbits := -math.Log2(rect.Size().Lat.Degrees()/45) + 2 // div by 180 = 45 * 2^2
+	geohashlngbits := -math.Log2(rect.Size().Lng.Degrees()/45) + 3 // div by 360 = 45 * 2^3
 	//fmt.Printf("lat %.99f, lng %.99f\n", geohashlatbits, geohashlngbits)
 	//fmt.Printf("lat %.9f, lng %.9f\n", latlong.Size().Lat.Degrees(), latlong.Size().Lng.Degrees())
 
@@ -232,7 +232,7 @@ func (latlong *Rect) GeoHash() string {
 	//fmt.Printf("%d, %d\n", geohashlatlen, geohashlnglen)
 
 	if geohashlatlen < geohashlnglen {
-		return latlong.geoHash(geohashlatlen)
+		return rect.geoHash(geohashlatlen)
 	}
-	return latlong.geoHash(geohashlnglen)
+	return rect.geoHash(geohashlnglen)
 }

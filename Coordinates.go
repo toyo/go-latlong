@@ -30,11 +30,12 @@ func NewLatLongsISO6709(str string) *Coordinates {
 }
 
 // S2Polyline is getter for s2.Polyline ([]s2.Point).
-func (cds Coordinates) S2Polyline() (ps s2.Polyline) {
+func (cds Coordinates) S2Polyline() s2.Polyline {
+	var ps s2.Polyline
 	for _, cd := range cds {
 		ps = append(ps, cd.S2Point())
 	}
-	return
+	return ps
 }
 
 // S2Loop is getter for s2.Loop.
@@ -44,7 +45,7 @@ func (cds Coordinates) S2Loop() *s2.Loop {
 	return lo
 }
 
-// MapsLatLng covert to google maps.
+// MapsLatLng convert to google maps.
 func (cds Coordinates) MapsLatLng() (mlls []maps.LatLng) {
 	for _, cd := range cds {
 		mlls = append(mlls, cd.MapsLatLng())
@@ -95,7 +96,7 @@ func (cds Coordinates) String() string {
 	return strings.Join(ss, ",")
 }
 
-// UnmarshalXML is Unmarshal function but NOT WORK.
+// UnmarshalXML is Unmarshal function.
 func (cds *Coordinates) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 
 	token, err := d.Token()

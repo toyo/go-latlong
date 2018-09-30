@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/golang/geo/s1"
 	"github.com/golang/geo/s2"
 )
 
@@ -74,8 +75,8 @@ func (latlong *Coordinate) UnmarshalJSON(data []byte) (err error) {
 func NewLatLongAlt(latitude, longitude, latprec, longprec float64, altitude *float64) *Coordinate {
 	var latlongalt Coordinate
 	latlongalt.LatLng.LatLng = s2.LatLngFromDegrees(latitude, longitude)
-	latlongalt.latprec = latprec
-	latlongalt.lngprec = longprec
+	latlongalt.latprec = s1.Angle(latprec) * s1.Degree
+	latlongalt.lngprec = s1.Angle(longprec) * s1.Degree
 	latlongalt.alt = altitude
 	return &latlongalt
 }

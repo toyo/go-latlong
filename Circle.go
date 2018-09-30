@@ -1,6 +1,7 @@
 package latlong
 
 import (
+	"github.com/golang/geo/s1"
 	"github.com/golang/geo/s2"
 )
 
@@ -9,8 +10,8 @@ type Circle struct {
 	//LatLng
 	//s1.Angle
 	s2.Cap
-	latprec float64
-	lngprec float64
+	latprec s1.Angle
+	lngprec s1.Angle
 }
 
 // NewCircle is constuctor for Cap
