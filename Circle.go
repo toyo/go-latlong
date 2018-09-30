@@ -7,38 +7,36 @@ import (
 
 // Circle is s2.Cap
 type Circle struct {
-	//LatLng
-	//s1.Angle
-	s2.Cap
-	latprec s1.Angle
-	lngprec s1.Angle
+	LatLng
+	s1.ChordAngle
 }
 
 // NewCircle is constuctor for Cap
 func NewCircle(latlng LatLng, km Km) *Circle {
 	circle := Circle{
-		Cap:     s2.CapFromCenterAngle(s2.PointFromLatLng(latlng.LatLng), km.EarthAngle()),
-		latprec: latlng.latprec,
-		lngprec: latlng.lngprec,
+		LatLng:     latlng,
+		ChordAngle: s1.ChordAngleFromAngle(km.EarthAngle()),
+	}
+	return &circle
+}
+func NewEmptyCircle() *Circle {
+	circle := Circle{
+		LatLng:     *NewLatLng(0, 0, 0, 0),
+		ChordAngle: s1.NegativeChordAngle,
 	}
 	return &circle
 }
 
-// Center returns LatLng of center.
-func (c *Circle) Center() LatLng {
-	ll := LatLng{
-		LatLng:  s2.LatLngFromPoint(c.Cap.Center()),
-		latprec: c.latprec,
-		lngprec: c.lngprec,
-	}
-	return ll
+func (c *Circle) S2Region() *s2.Cap {
+	cap := s2.CapFromCenterChordAngle(s2.PointFromLatLng(c.LatLng.LatLng), c.ChordAngle)
+	return &cap
 }
 
 // Radius returns radius of circle.
 func (c *Circle) Radius() Km {
-	return EarthArcFromAngle(c.Cap.Radius())
+	return EarthArcFromChordAngle(c.ChordAngle)
 }
 
 func (c *Circle) String() string {
-	return c.Center().String() + "/" + c.Radius().String()
+	return c.LatLng.String() + "/" + c.Radius().String()
 }

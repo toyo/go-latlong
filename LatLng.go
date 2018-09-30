@@ -19,6 +19,15 @@ type LatLng struct {
 	lngprec s1.Angle
 }
 
+// NewLatLng is from latitude, longitude and altitude.
+func NewLatLng(latitude, longitude, latprec, longprec float64) *LatLng {
+	var latlongalt LatLng
+	latlongalt.LatLng = s2.LatLngFromDegrees(latitude, longitude)
+	latlongalt.latprec = s1.Angle(latprec) * s1.Degree
+	latlongalt.lngprec = s1.Angle(longprec) * s1.Degree
+	return &latlongalt
+}
+
 // MarshalJSON is a marshaler for JSON.
 func (latlong *LatLng) MarshalJSON() ([]byte, error) {
 	s := latlong.lngString() + "," + latlong.latString()

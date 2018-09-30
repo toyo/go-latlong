@@ -1,16 +1,13 @@
 package latlong
 
 import (
-	"math"
 	"strconv"
 
 	"github.com/golang/geo/s1"
 )
 
 const (
-	radiusKmOfTheEarth        = 6371.01                          // radius km of the Earth.
-	circumferenceKmOfTheEarth = radiusKmOfTheEarth * 2 * math.Pi // circumference km of the Earth.
-	kmByChordAngle            = circumferenceKmOfTheEarth / 8    //
+	radiusKmOfTheEarth = 6371.01 // radius km of the Earth.
 )
 
 // Km is kilo-meter.
@@ -21,14 +18,19 @@ func (km Km) EarthAngle() s1.Angle {
 	return s1.Angle(km / radiusKmOfTheEarth)
 }
 
-// EarthArcFromChordAngle makes ChordAngle to Distance.
-func EarthArcFromChordAngle(chordangle s1.ChordAngle) Km {
-	return Km(chordangle * kmByChordAngle)
-}
-
 // EarthArcFromAngle makes Angle to Distance.
 func EarthArcFromAngle(angle s1.Angle) Km {
 	return Km(angle * radiusKmOfTheEarth)
+}
+
+// EarthChordAngle makes Distance to ChordAngle.
+func (km Km) EarthChordAngle() s1.ChordAngle {
+	return s1.ChordAngleFromAngle(km.EarthAngle())
+}
+
+// EarthArcFromChordAngle makes ChordAngle to Distance.
+func EarthArcFromChordAngle(chordangle s1.ChordAngle) Km {
+	return EarthArcFromAngle(chordangle.Angle())
 }
 
 func (km Km) String() string {
