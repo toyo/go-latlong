@@ -28,6 +28,11 @@ func NewLatLng(latitude, longitude, latprec, longprec float64) *LatLng {
 	return &latlongalt
 }
 
+// Equal is true if coordinate is same.
+func (latlong *LatLng) Equal(latlong1 *LatLng) bool {
+	return latlong.Lat == latlong1.Lat && latlong.Lng == latlong1.Lng
+}
+
 // MarshalJSON is a marshaler for JSON.
 func (latlong *LatLng) MarshalJSON() ([]byte, error) {
 	s := latlong.lngString() + "," + latlong.latString()
@@ -76,7 +81,7 @@ func (latlong LatLng) LatString() (s string) {
 	} else {
 		s += fmt.Sprintf(msgCatalog[Config.Lang].latS, strconv.FormatFloat(-lat, 'f', latprec, 64))
 	}
-	//s += "精度" + strconv.FormatFloat(latlong.latprec, 'f', 5, 64)
+	//s += "精度" + strconv.FormatFloat(latlong.latprec.Degrees(), 'f', 5, 64)
 	return
 }
 
@@ -102,7 +107,7 @@ func (latlong LatLng) LngString() (s string) {
 	} else {
 		s += fmt.Sprintf(msgCatalog[Config.Lang].lngW, strconv.FormatFloat(-lng, 'f', lngprec, 64))
 	}
-	//s += "精度" + strconv.FormatFloat(latlong.lngprec, 'f', 5, 64)
+	//s += "精度" + strconv.FormatFloat(latlong.lngprec.Degrees(), 'f', 5, 64)
 	return
 }
 
@@ -195,7 +200,7 @@ func getDegMin(part string, pos int) (deg float64, degprec float64) {
 	}
 
 	if l := len(part); l == pos {
-		degprec = 1 / 60
+		degprec = float64(1) / 60
 	} else {
 		degprec = math.Pow10(pos-l+1) / 60
 	}

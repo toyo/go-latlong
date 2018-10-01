@@ -1,6 +1,8 @@
 package latlong
 
 import (
+	"math"
+
 	"github.com/golang/geo/s1"
 	"github.com/golang/geo/s2"
 )
@@ -20,13 +22,24 @@ func NewCircle(latlng LatLng, km Km) *Circle {
 	return &circle
 }
 
-// NewPointCircle is constructor for Circle with radius = 0
+// NewPointCircle is constructor for Circle with radius = prec
 func NewPointCircle(latlng LatLng) *Circle {
+	latprecchordangle := s1.ChordAngleFromAngle(latlng.latprec)
+	lngprecchordangle := s1.ChordAngleFromAngle(latlng.lngprec) * s1.ChordAngle(math.Abs(math.Cos(float64(latlng.latprec.Radians()))))
+	var precchordangle s1.ChordAngle
+
+	if latprecchordangle > lngprecchordangle {
+		precchordangle = latprecchordangle
+	} else {
+		precchordangle = lngprecchordangle
+	}
+
 	circle := Circle{
 		LatLng:     latlng,
-		ChordAngle: 0,
+		ChordAngle: precchordangle,
 	}
 	return &circle
+
 }
 
 // NewEmptyCircle is constructor for Circle with empty.

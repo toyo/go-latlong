@@ -12,7 +12,7 @@ import (
 )
 
 // Polygon is Polygon.
-type Polygon LineString
+type Polygon []*LatLng
 
 // S2Region is getter for s2.Loop.
 func (cds Polygon) S2Region() *s2.Loop {
@@ -86,6 +86,9 @@ func (cds *Polygon) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 				*cds = append(*cds, &l.LatLng)
 			}
 		case xml.EndElement:
+			if !(*cds)[0].Equal((*cds)[len(*cds)-1]) {
+				return errors.New("Polygon is not closed")
+			}
 			return nil
 		default:
 			return fmt.Errorf("Unexpected Token on LatLongs %v", reflect.TypeOf(token))
