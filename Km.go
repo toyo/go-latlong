@@ -34,5 +34,5 @@ func EarthArcFromChordAngle(chordangle s1.ChordAngle) Km {
 }
 
 func (km Km) String() string {
-	return strconv.FormatFloat(float64(km), 'f', 0, 64) + "km"
+	return strconv.FormatFloat(float64(km), 'f', 1, 64) + "km"
 }
