@@ -70,7 +70,12 @@ func (latlong *LatLng) DistanceEarthKm(latlong1 *LatLng) Km {
 
 // LatString is string getter for latitude
 func (latlong LatLng) LatString() (s string) {
-	latprec := int(math.Ceil(-math.Log10(latlong.latprec.Degrees())))
+	var latprec int
+	if latlong.lngprec.Degrees() != 0 {
+		latprec = int(math.Ceil(-math.Log10(latlong.latprec.Degrees())))
+	} else {
+		latprec = 2
+	}
 	if latprec < 0 {
 		latprec = 0
 	}
@@ -96,7 +101,12 @@ func (latlong LatLng) latString() string {
 
 // LngString is string getter for longitude
 func (latlong LatLng) LngString() (s string) {
-	lngprec := int(math.Ceil(-math.Log10(latlong.lngprec.Degrees())))
+	var lngprec int
+	if latlong.lngprec.Degrees() != 0 {
+		lngprec = int(math.Ceil(-math.Log10(latlong.lngprec.Degrees())))
+	} else {
+		lngprec = 2
+	}
 	if lngprec < 0 {
 		lngprec = 0
 	}
