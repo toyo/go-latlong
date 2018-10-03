@@ -1,8 +1,6 @@
 package latlong
 
 import (
-	"strings"
-
 	"github.com/golang/geo/s2"
 	"googlemaps.github.io/maps"
 )
@@ -10,22 +8,6 @@ import (
 // LineString is slice of LatLong
 type LineString struct {
 	MultiPoint
-}
-
-// NewLineStringISO6709 is from ISO6709 latlongs.
-func NewLineStringISO6709(str string) *MultiPoint {
-	var ll MultiPoint
-	for _, s := range strings.Split(str, "/") {
-		if s != "" {
-			l := NewPointISO6709(s)
-			if l != nil {
-				ll = append(ll, l)
-			} else {
-				return nil
-			}
-		}
-	}
-	return &ll
 }
 
 // S2Polyline is getter for s2.Polyline ([]s2.Point).
@@ -53,10 +35,11 @@ func (cds LineString) MapsLatLng() (mlls []maps.LatLng) {
 }
 
 // S2Region is getter for s2.Polyline ([]s2.Point).
-func (cds LineString) S2Region() *s2.Polyline {
+func (cds *LineString) S2Region() *s2.Polyline {
 	var ps s2.Polyline
-	for _, cd := range cds.MultiPoint {
-		ps = append(ps, cd.S2Point())
+	ps = make(s2.Polyline, len(cds.MultiPoint))
+	for i := range cds.MultiPoint {
+		ps[i] = cds.MultiPoint[i].S2Point()
 	}
 	return &ps
 }

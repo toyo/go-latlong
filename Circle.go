@@ -51,10 +51,9 @@ func NewEmptyCircle() *Circle {
 	return &circle
 }
 
-// S2Region is getter for s2.S2Region.
-func (c *Circle) S2Region() *s2.Cap {
-	cap := s2.CapFromCenterChordAngle(s2.PointFromLatLng(c.Point.LatLng), c.ChordAngle)
-	return &cap
+// S2Region is getter for s2.Region.
+func (c *Circle) S2Region() s2.Cap {
+	return s2.CapFromCenterChordAngle(s2.PointFromLatLng(c.Point.LatLng), c.ChordAngle)
 }
 
 // Radius returns radius of circle.

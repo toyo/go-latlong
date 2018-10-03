@@ -19,8 +19,8 @@ func TestGeoJSONGeometryLineString(t *testing.T) {
 		t.Errorf("Unmarshal error: %v", err)
 	}
 
-	lsp, err := geom.LineString()
-	if err != nil {
+	lsp := geom.LineString()
+	if lsp == nil {
 		t.Errorf("LineString error: %v", err)
 	}
 	t.Logf("%s", lsp)
@@ -42,9 +42,9 @@ func TestGeoJSONGeometryCircle(t *testing.T) {
 		t.Errorf("Unmarshal error: %v", err)
 	}
 
-	lsp, err := geom.Circle()
-	if err != nil {
-		t.Errorf("Circle error: %v", err)
+	lsp := geom.Circle()
+	if lsp == nil {
+		t.Error("Circle error")
 	}
 	t.Logf("%s", lsp.String())
 }
@@ -58,12 +58,12 @@ func TestGeoJSONGeometryPolygon(t *testing.T) {
 	var geom latlong.GeoJSONGeometry
 	err := json.Unmarshal([]byte(jsonstring), &geom)
 	if err != nil {
-		t.Errorf("Unmarshal error: %v", err)
+		t.Error("Unmarshal error")
 	}
 
-	lsp, err := geom.Polygon()
-	if err != nil {
-		t.Errorf("Polygon error: %v", err)
+	lsp := geom.Polygon()
+	if lsp == nil {
+		t.Error("Polygon error")
 	}
 	t.Logf("%s", lsp)
 }

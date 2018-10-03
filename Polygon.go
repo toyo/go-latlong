@@ -10,10 +10,10 @@ type Polygon struct {
 }
 
 // S2Region is getter for s2.Loop.
-func (cds Polygon) S2Region() *s2.Loop {
-	var ps s2.Polyline
-	for _, cd := range cds.MultiPoint {
-		ps = append(ps, cd.S2Point())
+func (cds *Polygon) S2Region() *s2.Loop {
+	ps := make(s2.Polyline, len(cds.MultiPoint))
+	for i := range cds.MultiPoint {
+		ps[i] = cds.MultiPoint[i].S2Point()
 	}
 	l := s2.LoopFromPoints(ps)
 	if !l.IsNormalized() {

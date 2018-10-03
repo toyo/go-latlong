@@ -1,7 +1,7 @@
 package latlong
 
 import (
-	"errors"
+	"github.com/golang/geo/s2"
 )
 
 // GeoJSONGeometry is Geometry of GeoJSON
@@ -27,48 +27,66 @@ func (geom GeoJSONGeometry) Equal(geom1 GeoJSONGeometry) bool {
 	return true
 }
 
+// S2Region is getter for s2.Region.
+func (geom GeoJSONGeometry) S2Region() s2.Region {
+	switch geom.Type {
+	case "Circle":
+		return geom.Circle().S2Region()
+	case "LineString":
+		return geom.LineString().S2Region()
+	case "Polygon":
+		return geom.Polygon().S2Region()
+	}
+	return s2.EmptyRect()
+}
+
 // Polygon extract Polygon
-func (geom GeoJSONGeometry) Polygon() (ls Polygon, err error) {
+func (geom GeoJSONGeometry) Polygon() *Polygon {
 	if geom.Type != "Polygon" {
-		err = errors.New("No Polygon")
-		return
+		return nil
 	}
-	mp := make(MultiPoint, len(geom.Coordinates[0].([]interface{})))
-	ls = Polygon{MultiPoint: mp}
-	for i := range geom.Coordinates[0].([]interface{}) {
-		g := geom.Coordinates[0].([]interface{})[i].([]interface{})
-		ls.MultiPoint[i] = NewPoint(g[1].(float64), g[0].(float64), 0, 0)
+	switch len(geom.Coordinates) {
+	case 0:
+		panic("No Polygon!")
+	case 1:
+		coor := geom.Coordinates[0].([]interface{})
+		mp := make(MultiPoint, len(coor))
+		for i := range coor {
+			g := coor[i].([]interface{})
+			mp[i] = NewPoint(g[1].(float64), g[0].(float64), 0, 0)
+		}
+		return &Polygon{MultiPoint: mp}
+	default:
+		panic("Polygon has hole! Not implemented")
 	}
-	return
+
 }
 
 // LineString extract LineString
-func (geom GeoJSONGeometry) LineString() (ls LineString, err error) {
+func (geom GeoJSONGeometry) LineString() *LineString {
 	if geom.Type != "LineString" {
-		err = errors.New("No LineString")
-		return
+		return nil
 	}
-	mp := make(MultiPoint, len(geom.Coordinates))
-	ls = LineString{MultiPoint: mp}
-	for i := range geom.Coordinates {
-		g := geom.Coordinates[i].([]interface{})
-		ls.MultiPoint[i] = NewPoint(g[1].(float64), g[0].(float64), 0, 0)
+	coor := geom.Coordinates
+	mp := make(MultiPoint, len(coor))
+	for i := range coor {
+		g := coor[i].([]interface{})
+		mp[i] = NewPoint(g[1].(float64), g[0].(float64), 0, 0)
 	}
-	return
+	return &LineString{MultiPoint: mp}
 }
 
 // Circle extract Circle
-func (geom GeoJSONGeometry) Circle() (ls Circle, err error) {
+func (geom GeoJSONGeometry) Circle() (ls *Circle) {
 	if geom.Type != "Circle" {
-		err = errors.New("No Circle")
-		return
+		return nil
 	}
 
 	radius := geom.Radius
 	if radius == nil {
-		ls = *NewEmptyCircle()
+		ls = NewEmptyCircle()
 	} else {
-		ls = *NewCircle(*NewPoint(geom.Coordinates[1].(float64), geom.Coordinates[0].(float64), 0, 0), Km(*radius))
+		ls = NewCircle(*NewPoint(geom.Coordinates[1].(float64), geom.Coordinates[0].(float64), 0, 0), Km(*radius))
 	}
 
 	return

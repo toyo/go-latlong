@@ -17,6 +17,22 @@ func (cds *MultiPoint) Point() *Point {
 	return (*cds)[0]
 }
 
+// NewMultiPointISO6709 is from ISO6709 latlongs.
+func NewMultiPointISO6709(str string) *MultiPoint {
+	var ll MultiPoint
+	for _, s := range strings.Split(str, "/") {
+		if s != "" {
+			l := NewPointISO6709(s)
+			if l != nil {
+				ll = append(ll, l)
+			} else {
+				return nil
+			}
+		}
+	}
+	return &ll
+}
+
 func (cds *MultiPoint) reverse() {
 	for i, j := 0, len(*cds)-1; i < j; i, j = i+1, j-1 {
 		(*cds)[i], (*cds)[j] = (*cds)[j], (*cds)[i]
@@ -80,7 +96,7 @@ func (cds *MultiPoint) UnmarshalXML(d *xml.Decoder, start xml.StartElement) erro
 
 		switch t := token.(type) {
 		case xml.CharData:
-			b := NewLineStringISO6709(string(t))
+			b := NewMultiPointISO6709(string(t))
 			if b == nil {
 				return errors.New("Unexpected CharData on Coordinates UnmarshalXML")
 			}
