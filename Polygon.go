@@ -12,7 +12,7 @@ import (
 )
 
 // Polygon is Polygon.
-type Polygon []*LatLng
+type Polygon []*Point
 
 // S2Region is getter for s2.Loop.
 func (cds Polygon) S2Region() *s2.Loop {
@@ -83,7 +83,7 @@ func (cds *Polygon) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 				return errors.New("Unexpected CharData on Coordinates UnmarshalXML")
 			}
 			for _, l := range *b {
-				*cds = append(*cds, &l.LatLng)
+				*cds = append(*cds, &l.Point)
 			}
 		case xml.EndElement:
 			if !(*cds)[0].Equal((*cds)[len(*cds)-1]) {

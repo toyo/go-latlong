@@ -13,7 +13,7 @@ import (
 
 // Coordinate is LatLng and Altitude.
 type Coordinate struct {
-	LatLng
+	Point
 	alt *float64 // altitude
 }
 
@@ -74,7 +74,7 @@ func (latlong *Coordinate) UnmarshalJSON(data []byte) (err error) {
 // NewLatLongAlt is from latitude, longitude and altitude.
 func NewLatLongAlt(latitude, longitude, latprec, longprec float64, altitude *float64) *Coordinate {
 	var latlongalt Coordinate
-	latlongalt.LatLng.LatLng = s2.LatLngFromDegrees(latitude, longitude)
+	latlongalt.Point.LatLng = s2.LatLngFromDegrees(latitude, longitude)
 	latlongalt.latprec = s1.Angle(latprec) * s1.Degree
 	latlongalt.lngprec = s1.Angle(longprec) * s1.Degree
 	latlongalt.alt = altitude

@@ -11,6 +11,22 @@ type GeoJSONGeometry struct {
 	Radius      *float64      `json:"radius"` // only for Circle, which is GeoJSON specification 1.1 and leter.
 }
 
+// Equal return equal or not.
+func (geom GeoJSONGeometry) Equal(geom1 GeoJSONGeometry) bool {
+	if geom.Type != geom1.Type {
+		return false
+	}
+	if geom.Radius != geom1.Radius {
+		return false
+	}
+	for i := range geom.Coordinates {
+		if geom.Coordinates[i] != geom1.Coordinates[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // Polygon extract Polygon
 func (geom GeoJSONGeometry) Polygon() (ls Polygon, err error) {
 	if geom.Type != "Polygon" {
@@ -20,7 +36,7 @@ func (geom GeoJSONGeometry) Polygon() (ls Polygon, err error) {
 	ls = make(Polygon, len(geom.Coordinates[0].([]interface{})))
 	for i := range geom.Coordinates[0].([]interface{}) {
 		g := geom.Coordinates[0].([]interface{})[i].([]interface{})
-		ls[i] = NewLatLng(g[1].(float64), g[0].(float64), 0, 0)
+		ls[i] = NewPoint(g[1].(float64), g[0].(float64), 0, 0)
 	}
 	return
 }
@@ -34,7 +50,7 @@ func (geom GeoJSONGeometry) LineString() (ls LineString, err error) {
 	ls = make(LineString, len(geom.Coordinates))
 	for i := range geom.Coordinates {
 		g := geom.Coordinates[i].([]interface{})
-		ls[i] = NewLatLng(g[1].(float64), g[0].(float64), 0, 0)
+		ls[i] = NewPoint(g[1].(float64), g[0].(float64), 0, 0)
 	}
 	return
 }
@@ -50,7 +66,7 @@ func (geom GeoJSONGeometry) Circle() (ls Circle, err error) {
 	if radius == nil {
 		ls = *NewEmptyCircle()
 	} else {
-		ls = *NewCircle(*NewLatLng(geom.Coordinates[1].(float64), geom.Coordinates[0].(float64), 0, 0), Km(*radius))
+		ls = *NewCircle(*NewPoint(geom.Coordinates[1].(float64), geom.Coordinates[0].(float64), 0, 0), Km(*radius))
 	}
 
 	return

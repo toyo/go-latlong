@@ -18,13 +18,13 @@ type Rect struct {
 
 // MarshalJSON is a marshaler for JSON.
 func (rect *Rect) MarshalJSON() (bb []byte, e error) {
-	type LatLngs []LatLng
+	type LatLngs []Point
 
-	v := []LatLng{
-		LatLng{LatLng: rect.Vertex(0), latprec: rect.Rect.Size().Lat / 10, lngprec: rect.Rect.Size().Lng / 10},
-		LatLng{LatLng: rect.Vertex(1), latprec: rect.Rect.Size().Lat / 10, lngprec: rect.Rect.Size().Lng / 10},
-		LatLng{LatLng: rect.Vertex(2), latprec: rect.Rect.Size().Lat / 10, lngprec: rect.Rect.Size().Lng / 10},
-		LatLng{LatLng: rect.Vertex(3), latprec: rect.Rect.Size().Lat / 10, lngprec: rect.Rect.Size().Lng / 10},
+	v := []Point{
+		Point{LatLng: rect.Vertex(0), latprec: rect.Rect.Size().Lat / 10, lngprec: rect.Rect.Size().Lng / 10},
+		Point{LatLng: rect.Vertex(1), latprec: rect.Rect.Size().Lat / 10, lngprec: rect.Rect.Size().Lng / 10},
+		Point{LatLng: rect.Vertex(2), latprec: rect.Rect.Size().Lat / 10, lngprec: rect.Rect.Size().Lng / 10},
+		Point{LatLng: rect.Vertex(3), latprec: rect.Rect.Size().Lat / 10, lngprec: rect.Rect.Size().Lng / 10},
 	}
 
 	bs := make([][]byte, 0)
@@ -99,8 +99,8 @@ loop:
 }
 
 // Center returns center LatLng.
-func (rect Rect) Center() *LatLng {
-	return &LatLng{LatLng: rect.Rect.Center(), latprec: rect.Rect.Size().Lat, lngprec: rect.Rect.Size().Lng}
+func (rect Rect) Center() *Point {
+	return &Point{LatLng: rect.Rect.Center(), latprec: rect.Rect.Size().Lat, lngprec: rect.Rect.Size().Lng}
 }
 
 // PrecString is Precision String()

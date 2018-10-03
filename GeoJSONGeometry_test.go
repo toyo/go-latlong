@@ -65,3 +65,25 @@ func TestGeoJSONGeometryPolygon(t *testing.T) {
 	}
 	t.Logf("%s", lsp)
 }
+
+func TestGeoJSONGeometryPoint(t *testing.T) {
+	//ll := Point{LatLng: s2.LatLng{Lat: math.Pi * 35 / 180, Lng: math.Pi * 139 / 180},
+	//	latprec: 2, lngprec: 3}
+	llj := GeoJSONGeometry{Coordinates: []interface{}{float64(139), float64(35)}, Type: "Point"}
+
+	b, err := json.Marshal(llj)
+	if err != nil {
+		t.Errorf("Unmarshal error: %v", err)
+	}
+	t.Logf("%v", string(b))
+
+	var ll1j GeoJSONGeometry
+	err = json.Unmarshal(b, &ll1j)
+	if err != nil {
+		t.Errorf("Unmarshal error: %v", err)
+	}
+
+	if !llj.Equal(ll1j) {
+		t.Errorf("Unmatched expct %#v got %#v", llj, ll1j)
+	}
+}

@@ -13,7 +13,7 @@ import (
 )
 
 // LineString is slice of LatLong
-type LineString []*LatLng
+type LineString []*Point
 
 // S2Region is getter for s2.Polyline ([]s2.Point).
 func (cds LineString) S2Region() *s2.Polyline {
@@ -94,7 +94,7 @@ func (cds *LineString) UnmarshalXML(d *xml.Decoder, start xml.StartElement) erro
 				return errors.New("Unexpected CharData on Coordinates UnmarshalXML")
 			}
 			for _, l := range *b {
-				*cds = append(*cds, &l.LatLng)
+				*cds = append(*cds, &l.Point)
 			}
 		case xml.EndElement:
 			return nil

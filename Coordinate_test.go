@@ -28,8 +28,11 @@ func TestString(t *testing.T) {
 	}
 
 	b := new(bytes.Buffer)
-	err := json.NewEncoder(b).Encode(&ll)
-	correctResponseJSON := "[[139.67,35.67],[139.75,35.67],[139.75,35.71],[139.67,35.71]]\n"
+	centerll := ll.Center()
+	t.Logf("prec %f,%f", centerll.latprec.Degrees(), centerll.lngprec.Degrees())
+	err := json.NewEncoder(b).Encode(centerll)
+	correctResponseJSON := `[139.71,35.69]
+`
 	if err != nil {
 		t.Error(err)
 		return

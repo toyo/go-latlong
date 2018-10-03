@@ -23,7 +23,8 @@ func TestNewLatLongAltsString(t *testing.T) {
 
 	b := new(bytes.Buffer)
 	err := json.NewEncoder(b).Encode(&ll)
-	correctResponseJSON := "[[123.45,12.34,3776],[-12.57,1.39,-3776],[1.396,-0.209,-12345]]\n"
+	correctResponseJSON := `[[123.45,12.34,3776],[-12.575,1.390,-3776],[1.3958,-0.2094,-12345]]
+`
 	if err != nil {
 		t.Error(err)
 		return

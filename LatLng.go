@@ -1,6 +1,7 @@
 package latlong
 
 import (
+	"bytes"
 	"fmt"
 	"math"
 	"net/http"
@@ -12,16 +13,16 @@ import (
 	"googlemaps.github.io/maps"
 )
 
-// LatLng is Latitude & Longitude with precision.
-type LatLng struct {
+// Point is Latitude & Longitude with precision.
+type Point struct {
 	s2.LatLng
 	latprec s1.Angle
 	lngprec s1.Angle
 }
 
-// NewLatLng is from latitude, longitude and altitude.
-func NewLatLng(latitude, longitude, latprec, longprec float64) *LatLng {
-	var latlongalt LatLng
+// NewPoint is from latitude, longitude and altitude.
+func NewPoint(latitude, longitude, latprec, longprec float64) *Point {
+	var latlongalt Point
 	latlongalt.LatLng = s2.LatLngFromDegrees(latitude, longitude)
 	latlongalt.latprec = s1.Angle(latprec) * s1.Degree
 	latlongalt.lngprec = s1.Angle(longprec) * s1.Degree
@@ -29,119 +30,99 @@ func NewLatLng(latitude, longitude, latprec, longprec float64) *LatLng {
 }
 
 // Equal is true if coordinate is same.
-func (latlong *LatLng) Equal(latlong1 *LatLng) bool {
+func (latlong *Point) Equal(latlong1 *Point) bool {
 	return latlong.Lat == latlong1.Lat && latlong.Lng == latlong1.Lng
 }
 
-// MarshalJSON is a marshaler for JSON.
-func (latlong *LatLng) MarshalJSON() ([]byte, error) {
-	s := latlong.lngString() + "," + latlong.latString()
-	return []byte("[" + s + "]"), nil
-}
-
-// UnmarshalJSON is a unmarshaler for JSON.
-func (latlong *LatLng) UnmarshalJSON(data []byte) (err error) {
-	var c Coordinate
-
-	err = c.UnmarshalJSON(data)
-	latlong = &c.LatLng
-	return
-}
-
 // S2LatLng is getter for s2.LatLng
-func (latlong LatLng) S2LatLng() s2.LatLng {
+func (latlong Point) S2LatLng() s2.LatLng {
 	return latlong.LatLng
 }
 
 // S2Point is getter for s2.Point
-func (latlong LatLng) S2Point() s2.Point {
+func (latlong Point) S2Point() s2.Point {
 	return s2.PointFromLatLng(latlong.S2LatLng())
 }
 
 // DistanceAngle in radian.
-func (latlong *LatLng) DistanceAngle(latlong1 *LatLng) s1.Angle {
+func (latlong *Point) DistanceAngle(latlong1 *Point) s1.Angle {
 	return latlong.Distance(latlong1.LatLng)
 }
 
 // DistanceEarthKm in km at surface.
-func (latlong *LatLng) DistanceEarthKm(latlong1 *LatLng) Km {
+func (latlong *Point) DistanceEarthKm(latlong1 *Point) Km {
 	return EarthArcFromAngle(latlong.DistanceAngle(latlong1))
 }
 
-// LatString is string getter for latitude
-func (latlong LatLng) LatString() (s string) {
-	var latprec int
+func (latlong Point) latpreclog() (latprec int) {
 	if latlong.lngprec.Degrees() != 0 {
 		latprec = int(math.Ceil(-math.Log10(latlong.latprec.Degrees())))
+		if latprec < 0 {
+			latprec = 0
+		}
 	} else {
 		latprec = 2
 	}
-	if latprec < 0 {
-		latprec = 0
-	}
+	return
+}
 
+// LatString is string getter for latitude
+func (latlong Point) LatString() (s string) {
 	lat := latlong.Lat.Degrees()
 	if lat >= 0 {
-		s += fmt.Sprintf(msgCatalog[Config.Lang].latN, strconv.FormatFloat(lat, 'f', latprec, 64))
+		s += fmt.Sprintf(msgCatalog[Config.Lang].latN, strconv.FormatFloat(lat, 'f', latlong.latpreclog(), 64))
 	} else {
-		s += fmt.Sprintf(msgCatalog[Config.Lang].latS, strconv.FormatFloat(-lat, 'f', latprec, 64))
+		s += fmt.Sprintf(msgCatalog[Config.Lang].latS, strconv.FormatFloat(-lat, 'f', latlong.latpreclog(), 64))
 	}
 	//s += "精度" + strconv.FormatFloat(latlong.latprec.Degrees(), 'f', 5, 64)
 	return
 }
 
 // latString is string getter for latitude
-func (latlong LatLng) latString() string {
-	latprec := int(-math.Log10(latlong.latprec.Degrees()))
-	if latprec < 0 {
-		latprec = 0
-	}
-	return strconv.FormatFloat(latlong.Lat.Degrees(), 'f', latprec, 64)
+func (latlong Point) latString() string {
+	return strconv.FormatFloat(latlong.Lat.Degrees(), 'f', latlong.latpreclog(), 64)
 }
 
-// LngString is string getter for longitude
-func (latlong LatLng) LngString() (s string) {
-	var lngprec int
+func (latlong Point) lngpreclog() (lngprec int) {
 	if latlong.lngprec.Degrees() != 0 {
 		lngprec = int(math.Ceil(-math.Log10(latlong.lngprec.Degrees())))
+		if lngprec < 0 {
+			lngprec = 0
+		}
 	} else {
 		lngprec = 2
 	}
-	if lngprec < 0 {
-		lngprec = 0
-	}
+	return
+}
 
+// LngString is string getter for longitude
+func (latlong Point) LngString() (s string) {
 	lng := latlong.Lng.Degrees()
 	if lng >= 0 {
-		s += fmt.Sprintf(msgCatalog[Config.Lang].lngE, strconv.FormatFloat(lng, 'f', lngprec, 64))
+		s += fmt.Sprintf(msgCatalog[Config.Lang].lngE, strconv.FormatFloat(lng, 'f', latlong.lngpreclog(), 64))
 	} else {
-		s += fmt.Sprintf(msgCatalog[Config.Lang].lngW, strconv.FormatFloat(-lng, 'f', lngprec, 64))
+		s += fmt.Sprintf(msgCatalog[Config.Lang].lngW, strconv.FormatFloat(-lng, 'f', latlong.lngpreclog(), 64))
 	}
 	//s += "精度" + strconv.FormatFloat(latlong.lngprec.Degrees(), 'f', 5, 64)
 	return
 }
 
 // lngString is string getter for longitude
-func (latlong LatLng) lngString() string {
-	lngprec := int(-math.Log10(latlong.lngprec.Degrees()))
-	if lngprec < 0 {
-		lngprec = 0
-	}
-
-	return strconv.FormatFloat(latlong.Lng.Degrees(), 'f', lngprec, 64)
+func (latlong Point) lngString() string {
+	return strconv.FormatFloat(latlong.Lng.Degrees(), 'f', latlong.lngpreclog(), 64)
 }
 
-func (latlong LatLng) String() string {
+func (latlong Point) String() string {
 	return latlong.LatString() + msgCatalog[Config.Lang].comma + latlong.LngString()
 }
 
 // PrecisionArea returns area size of precicion.
-func (latlong LatLng) PrecisionArea() float64 {
+func (latlong Point) PrecisionArea() float64 {
 	return latlong.latprec.Degrees() * latlong.lngprec.Degrees()
 }
 
 // PrecString is Precision String()
-func (latlong LatLng) PrecString() (s string) {
+func (latlong Point) PrecString() (s string) {
 	if Config.Lang == "ja" {
 		s = fmt.Sprintf("緯度誤差%f度、経度誤差%f度", latlong.latprec, latlong.lngprec)
 	} else {
@@ -151,7 +132,7 @@ func (latlong LatLng) PrecString() (s string) {
 }
 
 // MapsLatLng return maps.LatLng ( "googlemaps.github.io/maps" )
-func (latlong LatLng) MapsLatLng() maps.LatLng {
+func (latlong Point) MapsLatLng() maps.LatLng {
 	return maps.LatLng{Lat: latlong.Lat.Degrees(), Lng: latlong.Lng.Degrees()}
 }
 
@@ -314,4 +295,27 @@ var Config = config{
 	HTTPClient:    &http.Client{},
 	Lang:          "en", //= "ja" 	// Lang is an string language
 	YahooJPAPIURL: "https://map.yahooapis.jp/geoapi/V1/reverseGeoCoder",
+}
+
+// MarshalJSON is a marshaler for JSON.
+func (latlong Point) MarshalJSON() ([]byte, error) {
+	s := latlong.lngString() + "," + latlong.latString()
+	return []byte("[" + s + "]"), nil
+}
+
+// UnmarshalJSON is a unmarshaler for JSON.
+func (latlong *Point) UnmarshalJSON(data []byte) (err error) {
+	data = bytes.TrimSpace(data)
+	data = bytes.TrimLeft(data, "[")
+	data = bytes.TrimRight(data, "]")
+	datas := bytes.Split(data, []byte(`,`))
+
+	if len(data) < 2 {
+		return fmt.Errorf("Not enough LatLng JSON %d %s", len(data), string(data))
+	}
+
+	lat, latprec := getLat(string(datas[1]))
+	lng, lngprec := getLat(string(datas[0]))
+	*latlong = *NewPoint(lat, lng, latprec, lngprec)
+	return
 }
