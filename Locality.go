@@ -7,7 +7,7 @@ import (
 )
 
 // Locality returns Japanese City, Town, Village name.
-func (latlong *Coordinate) Locality(ctx context.Context) (s string, err error) {
+func (latlong *Point) Locality(ctx context.Context) (s string, err error) {
 
 	r := &maps.GeocodingRequest{
 		ResultType: []string{"locality"}, // "locality", "administrative_area_level_1", "country"

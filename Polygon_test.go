@@ -1,4 +1,4 @@
-package latlong
+package latlong_test
 
 import (
 	"encoding/xml"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/golang/geo/r3"
 	"github.com/golang/geo/s2"
+	latlong "github.com/toyo/go-latlong"
 )
 
 func TestPolygon1(t *testing.T) {
@@ -29,7 +30,7 @@ func TestPolygon1(t *testing.T) {
 		s2.Point{Vector: r3.Vector{X: -0.5556219858580568, Y: 0.641427564553707, Z: 0.5290131267386939}},
 		s2.Point{Vector: r3.Vector{X: -0.5553980515538867, Y: 0.6416214741327604, Z: 0.5290131267386939}}})
 
-	var ISO6709 Polygon
+	var ISO6709 latlong.Polygon
 
 	err := xml.Unmarshal([]byte(xmlstrings), &ISO6709)
 	if err != nil {

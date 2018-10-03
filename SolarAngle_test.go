@@ -1,12 +1,14 @@
-package latlong
+package latlong_test
 
 import (
 	"testing"
 	"time"
+
+	latlong "github.com/toyo/go-latlong"
 )
 
 func TestSolarAngle(t *testing.T) {
-	l := NewRectGridLocator("PM95UQ").Center()
+	l := latlong.NewRectGridLocator("PM95UQ").Center()
 
 	sa := l.SolarAngle(time.Unix(0, 0))
 	correctResponsesa := 70.38745256769428

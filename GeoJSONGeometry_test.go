@@ -1,8 +1,10 @@
-package latlong
+package latlong_test
 
 import (
 	"encoding/json"
 	"testing"
+
+	latlong "github.com/toyo/go-latlong"
 )
 
 func TestGeoJSONGeometryLineString(t *testing.T) {
@@ -11,7 +13,7 @@ func TestGeoJSONGeometryLineString(t *testing.T) {
 	"coordinates": [ [100.0, 0.0], [101.0, 1.0] ]
 	}`
 
-	var geom GeoJSONGeometry
+	var geom latlong.GeoJSONGeometry
 	err := json.Unmarshal([]byte(jsonstring), &geom)
 	if err != nil {
 		t.Errorf("Unmarshal error: %v", err)
@@ -34,7 +36,7 @@ func TestGeoJSONGeometryCircle(t *testing.T) {
 	}
   }`
 
-	var geom GeoJSONGeometry
+	var geom latlong.GeoJSONGeometry
 	err := json.Unmarshal([]byte(jsonstring), &geom)
 	if err != nil {
 		t.Errorf("Unmarshal error: %v", err)
@@ -53,7 +55,7 @@ func TestGeoJSONGeometryPolygon(t *testing.T) {
 	  [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0] ] ]
    }`
 
-	var geom GeoJSONGeometry
+	var geom latlong.GeoJSONGeometry
 	err := json.Unmarshal([]byte(jsonstring), &geom)
 	if err != nil {
 		t.Errorf("Unmarshal error: %v", err)
@@ -69,7 +71,7 @@ func TestGeoJSONGeometryPolygon(t *testing.T) {
 func TestGeoJSONGeometryPoint(t *testing.T) {
 	//ll := Point{LatLng: s2.LatLng{Lat: math.Pi * 35 / 180, Lng: math.Pi * 139 / 180},
 	//	latprec: 2, lngprec: 3}
-	llj := GeoJSONGeometry{Coordinates: []interface{}{float64(139), float64(35)}, Type: "Point"}
+	llj := latlong.GeoJSONGeometry{Coordinates: []interface{}{float64(139), float64(35)}, Type: "Point"}
 
 	b, err := json.Marshal(llj)
 	if err != nil {
@@ -77,7 +79,7 @@ func TestGeoJSONGeometryPoint(t *testing.T) {
 	}
 	t.Logf("%v", string(b))
 
-	var ll1j GeoJSONGeometry
+	var ll1j latlong.GeoJSONGeometry
 	err = json.Unmarshal(b, &ll1j)
 	if err != nil {
 		t.Errorf("Unmarshal error: %v", err)

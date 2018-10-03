@@ -1,8 +1,6 @@
 package latlong
 
 import (
-	"encoding/json"
-	"errors"
 	"math"
 
 	"github.com/golang/geo/s1"
@@ -82,73 +80,39 @@ func (c *Circle) CircumferenceToPole() Point {
 }
 
 // S2Loop is circumference loop.
-// radian is one vertex degree.
-func (c *Circle) S2Loop(radian s1.Angle) (loop *s2.Loop) {
-	p := s2.PointFromLatLng(c.CircumferenceToPole().LatLng)
-	axis := s2.PointFromLatLng(c.Point.LatLng)
-
-	var pss s2.Polyline
-	for angle := s1.Angle(0); angle < 2*math.Pi; angle += radian {
-		pss = append(pss, s2.Rotate(p, axis, angle))
-	}
-	pss = append(pss, s2.Rotate(p, axis, 0))
-
-	loop = s2.LoopFromPoints(pss)
-
-	return
+// div is nomber of vertices.
+func (c *Circle) S2Loop(div int) (loop *s2.Loop) {
+	return s2.RegularLoop(s2.PointFromLatLng(c.Point.LatLng), c.Angle(), div)
 }
 
 // S2LatLngs is circumference loop by []s2.LatLng.
 // radian is one vertex degree.
-func (c *Circle) S2LatLngs(radian s1.Angle) (lls []s2.LatLng) {
-	vs := c.S2Loop(radian).Vertices()
+func (c *Circle) S2LatLngs(div int) (lls []s2.LatLng) {
+	vs := c.S2Loop(div).Vertices()
 	for i := range vs {
 		lls = append(lls, s2.LatLngFromPoint(vs[i]))
 	}
 	return
 }
 
+// NewGeoJSONGeometry returns GeoJSONGeometry.
+func (c Circle) NewGeoJSONGeometry() *GeoJSONGeometry {
+	var g GeoJSONGeometry
+	g.Type = "Circle"
+	g.Coordinates = []interface{}{c.Point.Lng.Degrees(), c.Point.Lat.Degrees()}
+	radius := float64(c.Radius())
+	g.Radius = &radius
+
+	return &g
+}
+
 // LatLngs is circumference loop by []LatLng.LatLngs
 // radian is one vertex degree.
-func (c *Circle) LatLngs(radian s1.Angle) (lls []Point) {
-	vs := c.S2Loop(radian).Vertices()
+func (c *Circle) LatLngs(div int) (lls []Point) {
+	vs := c.S2Loop(div).Vertices()
 	for i := range vs {
 		ll := Point{LatLng: s2.LatLngFromPoint(vs[i])}
 		lls = append(lls, ll)
 	}
 	return
-}
-
-// CircleGeoJSON is GeoJSON format for Circle.
-type CircleGeoJSON struct {
-	Type       string     `json:"type"`
-	Coordinate Coordinate `json:"coordinates"`
-	Radius     *Km        `json:"radius"`
-}
-
-// MarshalJSON is a marshaler for JSON.
-func (c Circle) MarshalJSON() (data []byte, err error) {
-	var js CircleGeoJSON
-	js.Type = "Circle"
-	js.Coordinate.Point = c.Point
-	km := EarthArcFromChordAngle(c.ChordAngle)
-	if !math.IsNaN(float64(km)) {
-		js.Radius = &km
-	}
-	return json.Marshal(&js)
-}
-
-// UnmarshalJSON is a unmarshaler for JSON.
-func (c *Circle) UnmarshalJSON(data []byte) error {
-	var js CircleGeoJSON
-	err := json.Unmarshal(data, &js)
-	if js.Type != "Circle" {
-		err := errors.New("JSON Type is Circle but Type != Circle")
-		return err
-	}
-	c.Point = js.Coordinate.Point
-	if js.Radius != nil {
-		c.ChordAngle = js.Radius.EarthChordAngle()
-	}
-	return err
 }

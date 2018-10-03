@@ -1,4 +1,4 @@
-package latlong
+package latlong_test
 
 import (
 	"context"
@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+
+	latlong "github.com/toyo/go-latlong"
 )
 
 func TestLocality(t *testing.T) {
@@ -332,13 +334,13 @@ func TestLocality(t *testing.T) {
 	defer server.Close()
 
 	ctx := context.Background()
-	Config.GoogleMapsAPIURL = server.URL
+	latlong.Config.GoogleMapsAPIURL = server.URL
 
-	l := NewLatLongISO6709("+34.455846+136.725739/")
+	l := latlong.NewPointISO6709("+34.455846+136.725739/")
 
-	Config.Lang = "ja"
-	Config.GoogleAPIKey = "AIzaNotReallyAnAPIKey"
-	Config.YahooJPClientID = "NotReallyAnAPIKey"
+	latlong.Config.Lang = "ja"
+	latlong.Config.GoogleAPIKey = "AIzaNotReallyAnAPIKey"
+	latlong.Config.YahooJPClientID = "NotReallyAnAPIKey"
 
 	s, err := l.Locality(ctx)
 	if err != nil {

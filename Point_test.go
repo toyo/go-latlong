@@ -1,4 +1,4 @@
-package latlong
+package latlong_test
 
 import (
 	"bytes"
@@ -6,13 +6,15 @@ import (
 	"math/rand"
 	"testing"
 	"time"
+
+	latlong "github.com/toyo/go-latlong"
 )
 
 func TestString(t *testing.T) {
-	ll := NewRectGridLocator("PM95UQ")
+	ll := latlong.NewRectGridLocator("PM95UQ")
 	//ll := NewRectGridLocator("JJ00AA")
 
-	Config.Lang = "ja"
+	latlong.Config.Lang = "ja"
 	ls := ll.Center().String()
 	correctResponsels := "北緯35.69度、東経139.71度"
 	if ls != correctResponsels {
@@ -29,7 +31,6 @@ func TestString(t *testing.T) {
 
 	b := new(bytes.Buffer)
 	centerll := ll.Center()
-	t.Logf("prec %f,%f", centerll.latprec.Degrees(), centerll.lngprec.Degrees())
 	err := json.NewEncoder(b).Encode(centerll)
 	correctResponseJSON := `[139.71,35.69]
 `
@@ -75,7 +76,7 @@ func TestGridLocator(t *testing.T) {
 	for n := 0; n <= 12; n++ {
 		grid := string(randomGridLocator(n))
 		//fmt.Println(n, grid)
-		l := NewRectGridLocator(grid)
+		l := latlong.NewRectGridLocator(grid)
 		gl := l.GridLocator()
 		le := len(grid)
 		var correctResponsegl string
@@ -117,7 +118,7 @@ func TestGeoHash(t *testing.T) {
 		geohash := randomGeoHash(n)
 		//fmt.Println(geohash)
 
-		l, _ := NewRectGeoHash(geohash)
+		l, _ := latlong.NewRectGeoHash(geohash)
 
 		gh := l.GeoHash()
 		correctResponsegh := geohash
@@ -132,7 +133,7 @@ func TestGeoHash5(t *testing.T) {
 
 	geohash := randomGeoHash(5)
 	//fmt.Println(geohash)
-	l, _ := NewRectGeoHash(geohash)
+	l, _ := latlong.NewRectGeoHash(geohash)
 
 	gh := l.GeoHash5()
 	correctResponsegh := geohash
@@ -146,7 +147,7 @@ func TestGeoHash6(t *testing.T) {
 
 	geohash := randomGeoHash(6)
 	//fmt.Println(geohash)
-	l, _ := NewRectGeoHash(geohash)
+	l, _ := latlong.NewRectGeoHash(geohash)
 
 	gh := l.GeoHash6()
 	correctResponsegh := geohash

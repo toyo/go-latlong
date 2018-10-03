@@ -8,7 +8,7 @@ import (
 type GeoJSONGeometry struct {
 	Type        string        `json:"type"`
 	Coordinates []interface{} `json:"coordinates"`
-	Radius      *float64      `json:"radius"` // only for Circle, which is GeoJSON specification 1.1 and leter.
+	Radius      *float64      `json:"radius,omitempty"` // only for Circle, which is GeoJSON specification 1.1 and leter.
 }
 
 // Equal return equal or not.
@@ -33,10 +33,11 @@ func (geom GeoJSONGeometry) Polygon() (ls Polygon, err error) {
 		err = errors.New("No Polygon")
 		return
 	}
-	ls = make(Polygon, len(geom.Coordinates[0].([]interface{})))
+	mp := make(MultiPoint, len(geom.Coordinates[0].([]interface{})))
+	ls = Polygon{MultiPoint: mp}
 	for i := range geom.Coordinates[0].([]interface{}) {
 		g := geom.Coordinates[0].([]interface{})[i].([]interface{})
-		ls[i] = NewPoint(g[1].(float64), g[0].(float64), 0, 0)
+		ls.MultiPoint[i] = NewPoint(g[1].(float64), g[0].(float64), 0, 0)
 	}
 	return
 }
@@ -47,10 +48,11 @@ func (geom GeoJSONGeometry) LineString() (ls LineString, err error) {
 		err = errors.New("No LineString")
 		return
 	}
-	ls = make(LineString, len(geom.Coordinates))
+	mp := make(MultiPoint, len(geom.Coordinates))
+	ls = LineString{MultiPoint: mp}
 	for i := range geom.Coordinates {
 		g := geom.Coordinates[i].([]interface{})
-		ls[i] = NewPoint(g[1].(float64), g[0].(float64), 0, 0)
+		ls.MultiPoint[i] = NewPoint(g[1].(float64), g[0].(float64), 0, 0)
 	}
 	return
 }

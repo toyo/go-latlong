@@ -1,4 +1,4 @@
-package latlong
+package latlong_test
 
 import (
 	"fmt"
@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+
+	latlong "github.com/toyo/go-latlong"
 )
 
 func TestCityCodeJP(t *testing.T) {
@@ -17,13 +19,13 @@ func TestCityCodeJP(t *testing.T) {
 	}))
 	defer server.Close()
 
-	Config.YahooJPAPIURL = server.URL
+	latlong.Config.YahooJPAPIURL = server.URL
 
-	l := NewLatLongISO6709("+34.455846+136.725739/")
+	l := latlong.NewPointISO6709("+34.455846+136.725739/")
 
-	Config.Lang = "ja"
-	Config.GoogleAPIKey = "AIzaNotReallyAnAPIKey"
-	Config.YahooJPClientID = "NotReallyAnAPIKey"
+	latlong.Config.Lang = "ja"
+	latlong.Config.GoogleAPIKey = "AIzaNotReallyAnAPIKey"
+	latlong.Config.YahooJPClientID = "NotReallyAnAPIKey"
 
 	s, err := l.CityCodeJP()
 	if err != nil {
