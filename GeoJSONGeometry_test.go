@@ -69,8 +69,6 @@ func TestGeoJSONGeometryPolygon(t *testing.T) {
 }
 
 func TestGeoJSONGeometryPoint(t *testing.T) {
-	//ll := Point{LatLng: s2.LatLng{Lat: math.Pi * 35 / 180, Lng: math.Pi * 139 / 180},
-	//	latprec: 2, lngprec: 3}
 	llj := latlong.GeoJSONGeometry{Coordinates: []interface{}{float64(139), float64(35)}, Type: "Point"}
 
 	b, err := json.Marshal(llj)
