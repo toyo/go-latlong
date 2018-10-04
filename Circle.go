@@ -7,7 +7,7 @@ import (
 	"github.com/golang/geo/s2"
 )
 
-// Circle is s2.Cap
+// Circle is Circle
 type Circle struct {
 	Point
 	s1.ChordAngle
@@ -102,6 +102,15 @@ func (c Circle) NewGeoJSONGeometry() *GeoJSONGeometry {
 	radius := float64(c.Radius())
 	g.Radius = &radius
 
+	return &g
+}
+
+// NewGeoJSONFeature returns GeoJSONFeature.
+func (c Circle) NewGeoJSONFeature(property interface{}) *GeoJSONFeature {
+	var g GeoJSONFeature
+	g.Type = "Feature"
+	g.Geometry = c.NewGeoJSONGeometry()
+	g.Property = property
 	return &g
 }
 

@@ -486,3 +486,22 @@ func (latlong Point) altString() string {
 	}
 	return ""
 }
+
+// NewGeoJSONGeometry returns GeoJSONGeometry.
+func (latlong Point) NewGeoJSONGeometry() *GeoJSONGeometry {
+	var g GeoJSONGeometry
+	g.Type = "Point"
+	g.Coordinates = make([]interface{}, 1)
+	g.Coordinates[0] = latlong
+
+	return &g
+}
+
+// NewGeoJSONFeature returns GeoJSONFeature.
+func (latlong Point) NewGeoJSONFeature(property interface{}) *GeoJSONFeature {
+	var g GeoJSONFeature
+	g.Type = "Feature"
+	g.Geometry = latlong.NewGeoJSONGeometry()
+	g.Property = property
+	return &g
+}

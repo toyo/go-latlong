@@ -4,7 +4,7 @@ import (
 	"github.com/golang/geo/s2"
 )
 
-// Polygon is Polygon.
+// Polygon inherited MultiPoint
 type Polygon struct {
 	MultiPoint
 }
@@ -30,5 +30,14 @@ func (cds Polygon) NewGeoJSONGeometry() *GeoJSONGeometry {
 	for i := range cds.MultiPoint {
 		g.Coordinates[i] = cds.MultiPoint[i]
 	}
+	return &g
+}
+
+// NewGeoJSONFeature returns GeoJSONFeature.
+func (cds Polygon) NewGeoJSONFeature(property interface{}) *GeoJSONFeature {
+	var g GeoJSONFeature
+	g.Type = "Feature"
+	g.Geometry = cds.NewGeoJSONGeometry()
+	g.Property = property
 	return &g
 }

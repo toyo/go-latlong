@@ -5,7 +5,7 @@ import (
 	"googlemaps.github.io/maps"
 )
 
-// LineString is slice of LatLong
+// LineString inherited MultiPoint
 type LineString struct {
 	MultiPoint
 }
@@ -51,5 +51,14 @@ func (cds LineString) NewGeoJSONGeometry() *GeoJSONGeometry {
 	for i := range cds.MultiPoint {
 		g.Coordinates[i] = cds.MultiPoint[i]
 	}
+	return &g
+}
+
+// NewGeoJSONFeature returns GeoJSONFeature.
+func (cds LineString) NewGeoJSONFeature(property interface{}) *GeoJSONFeature {
+	var g GeoJSONFeature
+	g.Type = "Feature"
+	g.Geometry = cds.NewGeoJSONGeometry()
+	g.Property = property
 	return &g
 }

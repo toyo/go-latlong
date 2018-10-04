@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// MultiPoint is slice of LatLong
+// MultiPoint is slice of *Point
 type MultiPoint []*Point
 
 // Point returns the first point.
@@ -119,5 +119,14 @@ func (cds MultiPoint) NewGeoJSONGeometry() *GeoJSONGeometry {
 	for i := range cds {
 		g.Coordinates[i] = cds[i]
 	}
+	return &g
+}
+
+// NewGeoJSONFeature returns GeoJSONFeature.
+func (cds MultiPoint) NewGeoJSONFeature(property interface{}) *GeoJSONFeature {
+	var g GeoJSONFeature
+	g.Type = "Feature"
+	g.Geometry = cds.NewGeoJSONGeometry()
+	g.Property = property
 	return &g
 }

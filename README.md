@@ -21,7 +21,7 @@ import (
 )
 
 func main() {
-	l := latlong.NewLatLong(35, 135, 0.1, 0.1) // N35+-0.05 Deg. E135+-0.05 Deg.
+	l := latlong.NewRect(35, 135, 0.1, 0.1) // N35+-0.05 Deg. E135+-0.05 Deg.
 
 	fmt.Println(l.GridLocator()) // shows GridLocator. https://en.wikipedia.org/wiki/Maidenhead_Locator_System
 	fmt.Println(l.GeoHash())     // shows GeoHash. http://geohash.org/
@@ -29,3 +29,12 @@ func main() {
 }
 
 ```
+
+|Class of this library|s2geometry.io|GeoJSON|memo|
+|---|---|---|---|
+|Point  |s2.LatLng (+altitude)  |Point||
+|MultiPoint (= []*Point )|-|MultiPoint|is for ISO6709|
+|LineString | s2.Polyline |LineString ||
+|Polygon    | s2.Loop     |Polygon    |with no hole|
+|Circle     | s2.Cap      |Circle     |GeoJSON 1.1|
+|Rect       | s2.Rect     | -         ||
