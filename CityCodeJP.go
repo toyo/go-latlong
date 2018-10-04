@@ -32,8 +32,6 @@ func (latlong *Point) CityCodeJP() (code string, err error) {
 		return
 	}
 
-	defer resp.Body.Close()
-
 	decoder := json.NewDecoder(resp.Body)
 
 	var v struct {
@@ -59,6 +57,8 @@ func (latlong *Point) CityCodeJP() (code string, err error) {
 	}
 
 	err = decoder.Decode(&v)
+
+	resp.Body.Close()
 
 	if v.ResultInfo.Status != 200 {
 		err = errors.New(strconv.Itoa(v.Error.Code) + v.Error.Message)

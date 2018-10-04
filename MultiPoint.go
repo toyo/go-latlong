@@ -100,8 +100,8 @@ func (cds *MultiPoint) UnmarshalXML(d *xml.Decoder, start xml.StartElement) erro
 			if b == nil {
 				return errors.New("Unexpected CharData on Coordinates UnmarshalXML")
 			}
-			for _, l := range *b {
-				*cds = append(*cds, l)
+			for i := range *b {
+				*cds = append(*cds, (*b)[i])
 			}
 		case xml.EndElement:
 			return nil

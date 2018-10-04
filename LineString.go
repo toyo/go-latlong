@@ -36,8 +36,7 @@ func (cds LineString) MapsLatLng() (mlls []maps.LatLng) {
 
 // S2Region is getter for s2.Polyline ([]s2.Point).
 func (cds *LineString) S2Region() *s2.Polyline {
-	var ps s2.Polyline
-	ps = make(s2.Polyline, len(cds.MultiPoint))
+	ps := make(s2.Polyline, len(cds.MultiPoint))
 	for i := range cds.MultiPoint {
 		ps[i] = cds.MultiPoint[i].S2Point()
 	}
