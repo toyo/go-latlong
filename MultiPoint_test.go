@@ -11,7 +11,7 @@ import (
 func TestNewLatLongAltsString(t *testing.T) {
 	//str := `+32.9+130.9-10000/`
 	//str := `+30.4402+130.2000/+30.4588+130.2200/+30.4545+130.2400/+30.4400+130.2545/+30.4200+130.2489/+30.4061+130.2400/+30.4037+130.2200/+30.4200+130.2056/+30.4398+130.2000/+30.4400+130.1998/+30.4402+130.2000/`
-	ll := latlong.NewMultiPointISO6709("+12.34+123.45+3776/+0123.4-01234.5-3776/-001234+0012345-12345/")
+	ll := latlong.NewMultiPointISO6709([]byte("+12.34+123.45+3776/+0123.4-01234.5-3776/-001234+0012345-12345/"))
 	if ll == nil {
 		t.Errorf("NewLatLongAltssISO6709 returned non nil error")
 	}
@@ -39,7 +39,7 @@ func TestNewLatLongAltsString(t *testing.T) {
 }
 
 func TestLatLongstring(t *testing.T) {
-	ll := latlong.NewMultiPointISO6709("+12+123/+12.3+123.4/+12.34+123.43/")
+	ll := latlong.NewMultiPointISO6709([]byte("+12+123/+12.3+123.4/+12.34+123.43/"))
 	if ll == nil {
 		t.Errorf("NewLatLongsISO6709 returned nil error")
 	}

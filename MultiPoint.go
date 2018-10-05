@@ -1,6 +1,7 @@
 package latlong
 
 import (
+	"bytes"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -18,10 +19,10 @@ func (cds *MultiPoint) Point() *Point {
 }
 
 // NewMultiPointISO6709 is from ISO6709 latlongs.
-func NewMultiPointISO6709(str string) *MultiPoint {
+func NewMultiPointISO6709(str []byte) *MultiPoint {
 	var ll MultiPoint
-	for _, s := range strings.Split(str, "/") {
-		if s != "" {
+	for _, s := range bytes.Split(str, []byte(`/`)) {
+		if len(s) != 0 {
 			l := NewPointISO6709(s)
 			if l != nil {
 				ll = append(ll, l)
@@ -96,7 +97,7 @@ func (cds *MultiPoint) UnmarshalXML(d *xml.Decoder, start xml.StartElement) erro
 
 		switch t := token.(type) {
 		case xml.CharData:
-			b := NewMultiPointISO6709(string(t))
+			b := NewMultiPointISO6709(t)
 			if b == nil {
 				return errors.New("Unexpected CharData on Coordinates UnmarshalXML")
 			}

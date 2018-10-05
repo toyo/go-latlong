@@ -1,6 +1,7 @@
 package latlong
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"math"
@@ -33,11 +34,11 @@ func NewLatLongAlt(latitude, longitude, latprec, longprec float64, altitude *flo
 }
 
 // NewPointISO6709 is from ISO6709 string
-func NewPointISO6709(iso6709 string) *Point {
+func NewPointISO6709(iso6709 []byte) *Point {
 	re := regexp.MustCompile(`(?P<Latitude>[\+-][\d.]+)(?P<Longitude>[\+-][\d.]+)(?P<Altitude>[\+-][\d.]+)?`)
 
-	if re.MatchString(iso6709) {
-		match := re.FindStringSubmatch(iso6709)
+	if re.Match(iso6709) {
+		match := re.FindSubmatch(iso6709)
 
 		var latitude, longitude, latprec, longprec float64
 		var altitude *float64
@@ -80,7 +81,7 @@ func (latlong *Point) Scan(state fmt.ScanState, verb rune) (err error) {
 	var token []byte
 	token, err = state.Token(false, nil)
 	if err == nil {
-		*latlong = *NewPointISO6709(string(token))
+		*latlong = *NewPointISO6709(token)
 	}
 	return
 }
@@ -163,9 +164,9 @@ func (latlong Point) lngString() string {
 	return strconv.FormatFloat(latlong.Lng.Degrees(), 'f', latlong.lngpreclog(), 64)
 }
 
-func getAlt(part string) (altitude *float64) {
-	part = strings.TrimSpace(part)
-	if a, er := strconv.ParseFloat(part, 64); er == nil {
+func getAlt(part []byte) (altitude *float64) {
+	part = bytes.TrimSpace(part)
+	if a, er := strconv.ParseFloat(string(part), 64); er == nil {
 		altitude = &a
 	}
 	return
@@ -221,9 +222,9 @@ func getErrorDeg() (deg float64, degprec float64) {
 	return
 }
 
-func getDeg(part string, pos int) (deg float64, degprec float64) {
+func getDeg(part []byte, pos int) (deg float64, degprec float64) {
 	var err error
-	deg, err = strconv.ParseFloat(part, 64)
+	deg, err = strconv.ParseFloat(string(part), 64)
 	if err != nil {
 		deg, degprec = getErrorDeg()
 		return
@@ -237,15 +238,15 @@ func getDeg(part string, pos int) (deg float64, degprec float64) {
 	return
 }
 
-func getDegMin(part string, pos int) (deg float64, degprec float64) {
+func getDegMin(part []byte, pos int) (deg float64, degprec float64) {
 	var err error
-	if deg, err = strconv.ParseFloat(part[1:pos-2], 64); err != nil {
+	if deg, err = strconv.ParseFloat(string(part[1:pos-2]), 64); err != nil {
 		deg, degprec = getErrorDeg()
 		return
 	}
 
 	var min float64
-	if min, err = strconv.ParseFloat(part[pos-2:], 64); err != nil {
+	if min, err = strconv.ParseFloat(string(part[pos-2:]), 64); err != nil {
 		deg, degprec = getErrorDeg()
 		return
 	}
@@ -270,22 +271,22 @@ func getDegMin(part string, pos int) (deg float64, degprec float64) {
 	return
 }
 
-func getDegMinSec(part string, pos int) (deg float64, degprec float64) {
+func getDegMinSec(part []byte, pos int) (deg float64, degprec float64) {
 	var err error
-	if deg, err = strconv.ParseFloat(part[1:pos-4], 64); err != nil {
+	if deg, err = strconv.ParseFloat(string(part[1:pos-4]), 64); err != nil {
 		deg, degprec = getErrorDeg()
 		return
 	}
 
 	var min float64
-	if min, err = strconv.ParseFloat(part[pos-4:pos-2], 64); err != nil {
+	if min, err = strconv.ParseFloat(string(part[pos-4:pos-2]), 64); err != nil {
 		deg, degprec = getErrorDeg()
 		return
 	}
 	deg += min / 60
 
 	var sec float64
-	if sec, err = strconv.ParseFloat(part[pos-2:], 64); err != nil {
+	if sec, err = strconv.ParseFloat(string(part[pos-2:]), 64); err != nil {
 		deg, degprec = getErrorDeg()
 		return
 	}
@@ -310,9 +311,9 @@ func getDegMinSec(part string, pos int) (deg float64, degprec float64) {
 	return
 }
 
-func getLat(part string) (latitude float64, latprec float64) {
-	part = strings.TrimSpace(part)
-	pos := strings.Index(part, ".")
+func getLat(part []byte) (latitude float64, latprec float64) {
+	part = bytes.TrimSpace(part)
+	pos := bytes.Index(part, []byte(`.`))
 	if pos == -1 {
 		pos = len(part)
 	}
@@ -331,9 +332,9 @@ func getLat(part string) (latitude float64, latprec float64) {
 	return
 }
 
-func getLng(part string) (longitude float64, longprec float64) {
-	part = strings.TrimSpace(part)
-	pos := strings.Index(part, ".")
+func getLng(part []byte) (longitude float64, longprec float64) {
+	part = bytes.TrimSpace(part)
+	pos := bytes.Index(part, []byte(`.`))
 	if pos == -1 {
 		pos = len(part)
 	}
@@ -364,37 +365,12 @@ type config struct {
 // Config is an configuration of environment.
 var Config = config{
 	HTTPClient:    &http.Client{},
-	Lang:          "en", //= "ja" 	// Lang is an string language
+	Lang:          "en", // or "ja" 	// Lang is an string language
 	YahooJPAPIURL: "https://map.yahooapis.jp/geoapi/V1/reverseGeoCoder",
 }
 
-/*
 // MarshalJSON is a marshaler for JSON.
 func (latlong Point) MarshalJSON() ([]byte, error) {
-	s := latlong.lngString() + "," + latlong.latString()
-	return []byte("[" + s + "]"), nil
-}
-
-// UnmarshalJSON is a unmarshaler for JSON.
-func (latlong *Point) UnmarshalJSON(data []byte) (err error) {
-	data = bytes.TrimSpace(data)
-	data = bytes.TrimLeft(data, "[")
-	data = bytes.TrimRight(data, "]")
-	datas := bytes.Split(data, []byte(`,`))
-
-	if len(data) < 2 {
-		return fmt.Errorf("Not enough LatLng JSON %d %s", len(data), string(data))
-	}
-
-	lat, latprec := getLat(string(datas[1]))
-	lng, lngprec := getLat(string(datas[0]))
-	*latlong = *NewPoint(lat, lng, latprec, lngprec)
-	return
-}
-*/
-
-// MarshalJSON is a marshaler for JSON.
-func (latlong *Point) MarshalJSON() ([]byte, error) {
 	s := latlong.lngString() + "," + latlong.latString()
 	if latlong.alt != nil {
 		s += "," + latlong.altString()
@@ -404,7 +380,7 @@ func (latlong *Point) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON is a unmarshaler for JSON.
 func (latlong *Point) UnmarshalJSON(data []byte) (err error) {
-	s := strings.TrimSpace(string(data))
+	s := bytes.TrimSpace(data)
 
 	if s[0] != '[' {
 		return errors.New("Unknown JSON format (not starting '[')")
@@ -416,7 +392,7 @@ func (latlong *Point) UnmarshalJSON(data []byte) (err error) {
 	}
 	s = s[:len(s)-1]
 
-	v := strings.Split(s, ",")
+	v := bytes.Split(s, []byte(","))
 	switch len(v) {
 	case 2:
 		lat, latprec := getLat(v[1])
@@ -443,7 +419,6 @@ func (latlong *Point) UnmarshalJSON(data []byte) (err error) {
 	default:
 		return errors.New("unknown JSON Coordinate format")
 	}
-
 	return
 }
 
