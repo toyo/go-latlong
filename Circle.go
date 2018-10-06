@@ -111,7 +111,7 @@ func (c Circle) S2Point() s2.Point {
 }
 
 // S2Loop is circumference loop.
-// div is nomber of vertices.
+// div is number of vertices.
 func (c *Circle) S2Loop(div int) (loop *s2.Loop) {
 	return s2.RegularLoop(s2.PointFromLatLng(c.Point.S2LatLng()), c.Angle(), div)
 }
