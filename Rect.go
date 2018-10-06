@@ -21,10 +21,18 @@ func (rect *Rect) MarshalJSON() (bb []byte, e error) {
 	type LatLngs []Point
 
 	v := []Point{
-		Point{LatLng: rect.Vertex(0), latprec: rect.Rect.Size().Lat / 10, lngprec: rect.Rect.Size().Lng / 10},
-		Point{LatLng: rect.Vertex(1), latprec: rect.Rect.Size().Lat / 10, lngprec: rect.Rect.Size().Lng / 10},
-		Point{LatLng: rect.Vertex(2), latprec: rect.Rect.Size().Lat / 10, lngprec: rect.Rect.Size().Lng / 10},
-		Point{LatLng: rect.Vertex(3), latprec: rect.Rect.Size().Lat / 10, lngprec: rect.Rect.Size().Lng / 10},
+		Point{
+			lat: NewAngleFromS1Angle(rect.Rect.Vertex(0).Lat, rect.Rect.Size().Lat/10),
+			lng: NewAngleFromS1Angle(rect.Rect.Vertex(0).Lng, rect.Rect.Size().Lng/10)},
+		Point{
+			lat: NewAngleFromS1Angle(rect.Rect.Vertex(1).Lat, rect.Rect.Size().Lat/10),
+			lng: NewAngleFromS1Angle(rect.Rect.Vertex(1).Lng, rect.Rect.Size().Lng/10)},
+		Point{
+			lat: NewAngleFromS1Angle(rect.Rect.Vertex(2).Lat, rect.Rect.Size().Lat/10),
+			lng: NewAngleFromS1Angle(rect.Rect.Vertex(2).Lng, rect.Rect.Size().Lng/10)},
+		Point{
+			lat: NewAngleFromS1Angle(rect.Rect.Vertex(3).Lat, rect.Rect.Size().Lat/10),
+			lng: NewAngleFromS1Angle(rect.Rect.Vertex(3).Lng, rect.Rect.Size().Lng/10)},
 	}
 
 	bs := make([][]byte, 0)
@@ -100,7 +108,9 @@ loop:
 
 // Center returns center LatLng.
 func (rect Rect) Center() *Point {
-	return &Point{LatLng: rect.Rect.Center(), latprec: rect.Rect.Size().Lat, lngprec: rect.Rect.Size().Lng}
+	return &Point{
+		lat: NewAngleFromS1Angle(rect.Rect.Center().Lat, rect.Rect.Size().Lat/2),
+		lng: NewAngleFromS1Angle(rect.Rect.Center().Lng, rect.Rect.Size().Lng/2)}
 }
 
 // PrecString is Precision String()
@@ -120,8 +130,8 @@ func (rect *Rect) GridLocator() string {
 
 	var gl []rune
 
-	latitude := rect.Center().Lat.Degrees() + 90
-	longitude := rect.Center().Lng.Degrees() + 180
+	latitude := rect.Center().Lat().Degrees() + 90
+	longitude := rect.Center().Lng().Degrees() + 180
 
 	latprec := float64(10) * 24
 	lonprec := float64(20) * 24
@@ -188,7 +198,7 @@ func NewRectGeoHash(geoHash string) (latlong *Rect, err error) {
 }
 
 func (rect *Rect) geoHash(precision int) string {
-	return geohash.EncodeWithPrecision(rect.Center().Lat.Degrees(), rect.Center().Lng.Degrees(), precision)
+	return geohash.EncodeWithPrecision(rect.Center().Lat().Degrees(), rect.Center().Lng().Degrees(), precision)
 }
 
 // GeoHash5 returns GeoHash string.

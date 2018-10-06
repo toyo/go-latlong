@@ -13,8 +13,8 @@ func (latlong *Point) Locality(ctx context.Context) (s string, err error) {
 		ResultType: []string{"locality"}, // "locality", "administrative_area_level_1", "country"
 		Language:   Config.Lang,
 		LatLng: &maps.LatLng{
-			Lat: latlong.Lat.Degrees(),
-			Lng: latlong.Lng.Degrees(),
+			Lat: latlong.Lat().Degrees(),
+			Lng: latlong.Lng().Degrees(),
 		},
 	}
 

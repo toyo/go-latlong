@@ -1,6 +1,7 @@
 package latlong
 
 import (
+	"encoding/json"
 	"math"
 
 	"github.com/golang/geo/s1"
@@ -24,8 +25,8 @@ func NewCircle(latlng Point, km Km) *Circle {
 
 // NewPointCircle is constructor for Circle with radius = prec
 func NewPointCircle(latlng Point) *Circle {
-	latprecchordangle := s1.ChordAngleFromAngle(latlng.latprec)
-	lngprecchordangle := s1.ChordAngleFromAngle(latlng.lngprec) * s1.ChordAngle(math.Abs(math.Cos(float64(latlng.latprec.Radians()))))
+	latprecchordangle := s1.ChordAngleFromAngle(latlng.lat.PrecS1Angle())
+	lngprecchordangle := s1.ChordAngleFromAngle(latlng.lng.PrecS1Angle()) * s1.ChordAngle(math.Abs(math.Cos(float64(latlng.lat.PrecS1Angle()))))
 	var precchordangle s1.ChordAngle
 
 	if latprecchordangle > lngprecchordangle {
@@ -45,7 +46,6 @@ func NewPointCircle(latlng Point) *Circle {
 // NewEmptyCircle is constructor for Circle with empty.
 func NewEmptyCircle() *Circle {
 	circle := Circle{
-		Point:      *NewPoint(0, 0, 0, 0),
 		ChordAngle: s1.NegativeChordAngle,
 	}
 	return &circle
@@ -53,7 +53,37 @@ func NewEmptyCircle() *Circle {
 
 // S2Region is getter for s2.Region.
 func (c *Circle) S2Region() s2.Cap {
-	return s2.CapFromCenterChordAngle(s2.PointFromLatLng(c.Point.LatLng), c.ChordAngle)
+	return s2.CapFromCenterChordAngle(s2.PointFromLatLng(c.Point.S2LatLng()), c.ChordAngle)
+}
+
+// CapBound is for s2.Region interface.
+func (cds *Circle) CapBound() s2.Cap {
+	return cds.S2Region().CapBound()
+}
+
+// RectBound is for s2.Region interface.
+func (c *Circle) RectBound() s2.Rect {
+	return c.S2Region().RectBound()
+}
+
+// ContainsCell is for s2.Region interface.
+func (c *Circle) ContainsCell(cell s2.Cell) bool {
+	return c.S2Region().ContainsCell(cell)
+}
+
+// IntersectsCell is for s2.Region interface.
+func (c *Circle) IntersectsCell(cell s2.Cell) bool {
+	return c.S2Region().IntersectsCell(cell)
+}
+
+// ContainsPoint is for s2.Region interface.
+func (c *Circle) ContainsPoint(p s2.Point) bool {
+	return c.S2Region().ContainsPoint(p)
+}
+
+// CellUnionBound is for s2.Region interface.
+func (c *Circle) CellUnionBound() []s2.CellID {
+	return c.S2Region().CellUnionBound()
 }
 
 // Radius returns radius of circle.
@@ -65,23 +95,15 @@ func (c *Circle) String() string {
 	return c.Point.String() + "/" + c.Radius().String()
 }
 
-// CircumferenceToPole returns circle circumference point nearest to other pole.
-func (c *Circle) CircumferenceToPole() Point {
-	var l s2.LatLng
-	if c.Point.Lat > 0 { // if north side, nearest to south pole.
-		l.Lat = c.Lat - c.ChordAngle.Angle()
-		l.Lng = c.Lng
-	} else { // if south side, nearest to north pole.
-		l.Lat = c.Lat + c.ChordAngle.Angle()
-		l.Lng = c.Lng
-	}
-	return Point{LatLng: l}
+// Center is Center LatLng
+func (c *Circle) S2Point() s2.Point {
+	return c.Point.S2Point()
 }
 
 // S2Loop is circumference loop.
 // div is nomber of vertices.
 func (c *Circle) S2Loop(div int) (loop *s2.Loop) {
-	return s2.RegularLoop(s2.PointFromLatLng(c.Point.LatLng), c.Angle(), div)
+	return s2.RegularLoop(s2.PointFromLatLng(c.Point.S2LatLng()), c.Angle(), div)
 }
 
 // S2LatLngs is circumference loop by []s2.LatLng.
@@ -98,7 +120,11 @@ func (c *Circle) S2LatLngs(div int) (lls []s2.LatLng) {
 func (c Circle) NewGeoJSONGeometry() *GeoJSONGeometry {
 	var g GeoJSONGeometry
 	g.Type = "Circle"
-	g.Coordinates = []interface{}{c.Point.Lng.Degrees(), c.Point.Lat.Degrees()}
+	var err error
+	g.Coordinates, err = json.Marshal(&c.Point)
+	if err != nil {
+		panic("Error")
+	}
 	radius := float64(c.Radius())
 	g.Radius = &radius
 
@@ -119,7 +145,8 @@ func (c Circle) NewGeoJSONFeature(property interface{}) *GeoJSONFeature {
 func (c *Circle) LatLngs(div int) (lls []Point) {
 	vs := c.S2Loop(div).Vertices()
 	for i := range vs {
-		ll := Point{LatLng: s2.LatLngFromPoint(vs[i])}
+		s2ll := s2.LatLngFromPoint(vs[i])
+		ll := Point{lat: NewAngleFromS1Angle(s2ll.Lat, 0), lng: NewAngleFromS1Angle(s2ll.Lng, 0)}
 		lls = append(lls, ll)
 	}
 	return

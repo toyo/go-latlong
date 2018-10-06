@@ -7,7 +7,7 @@ import (
 // CurrentWeatherData return a pointer of struct for CurrentWeatherData
 func (ll *Point) CurrentWeatherData(unit, lang, apikey string) (w *owm.CurrentWeatherData, err error) {
 	if w, err = owm.NewCurrent(unit, lang, apikey); err == nil {
-		if err = w.CurrentByCoordinates(&owm.Coordinates{Longitude: ll.Lng.Degrees(), Latitude: ll.Lat.Degrees()}); err == nil {
+		if err = w.CurrentByCoordinates(&owm.Coordinates{Longitude: ll.Lng().Degrees(), Latitude: ll.Lat().Degrees()}); err == nil {
 			return
 		}
 	}

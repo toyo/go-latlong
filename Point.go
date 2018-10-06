@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -18,18 +17,16 @@ import (
 
 // Point is Latitude & Longitude with precision.
 type Point struct {
-	s2.LatLng
-	latprec s1.Angle
-	lngprec s1.Angle
-	alt     *float64 // altitude
+	lat Angle
+	lng Angle
+	alt *float64 // altitude
 }
 
 // NewLatLongAlt is from latitude, longitude and altitude.
-func NewLatLongAlt(latitude, longitude, latprec, longprec float64, altitude *float64) *Point {
+func NewLatLongAlt(lat, lng Angle, altitude *float64) *Point {
 	var latlongalt Point
-	latlongalt.LatLng = s2.LatLngFromDegrees(latitude, longitude)
-	latlongalt.latprec = s1.Angle(latprec) * s1.Degree
-	latlongalt.lngprec = s1.Angle(longprec) * s1.Degree
+	latlongalt.lat = lat
+	latlongalt.lng = lng
 	latlongalt.alt = altitude
 	return &latlongalt
 }
@@ -41,7 +38,7 @@ func NewPointISO6709(iso6709 []byte) *Point {
 	if re.Match(iso6709) {
 		match := re.FindSubmatch(iso6709)
 
-		var latitude, longitude, latprec, longprec float64
+		var lat, lng Angle
 		var altitude *float64
 
 		for i, name := range re.SubexpNames() {
@@ -51,30 +48,31 @@ func NewPointISO6709(iso6709 []byte) *Point {
 
 			switch name {
 			case "Latitude":
-				latitude, latprec = getLat(match[i])
+				lat = AngleFromBytes(match[i])
 			case "Longitude":
-				longitude, longprec = getLng(match[i])
+				lng = AngleFromBytes(match[i])
 			case "Altitude":
 				altitude = getAlt(match[i])
 			}
 		}
-		return NewLatLongAlt(latitude, longitude, latprec, longprec, altitude)
+		return NewLatLongAlt(lat, lng, altitude)
 	}
 	return nil
 }
 
-// NewPoint is from latitude, longitude and altitude.
-func NewPoint(latitude, longitude, latprec, longprec float64) *Point {
-	var latlongalt Point
-	latlongalt.LatLng = s2.LatLngFromDegrees(latitude, longitude)
-	latlongalt.latprec = s1.Angle(latprec) * s1.Degree
-	latlongalt.lngprec = s1.Angle(longprec) * s1.Degree
-	return &latlongalt
+func (latlong *Point) Lat() (a Angle) {
+	a = latlong.lat
+	return
+}
+
+func (latlong *Point) Lng() (a Angle) {
+	a = latlong.lng
+	return
 }
 
 // Equal is true if coordinate is same.
 func (latlong *Point) Equal(latlong1 *Point) bool {
-	return latlong.Lat == latlong1.Lat && latlong.Lng == latlong1.Lng
+	return latlong.Lat() == latlong1.Lat() && latlong.Lng() == latlong1.Lng()
 }
 
 // Scan is for fmt.Scanner
@@ -89,7 +87,7 @@ func (latlong *Point) Scan(state fmt.ScanState, verb rune) (err error) {
 
 // S2LatLng is getter for s2.LatLng
 func (latlong Point) S2LatLng() s2.LatLng {
-	return latlong.LatLng
+	return s2.LatLng{Lat: latlong.Lat().Radians(), Lng: latlong.Lng().Radians()}
 }
 
 // S2Point is getter for s2.Point
@@ -99,7 +97,7 @@ func (latlong Point) S2Point() s2.Point {
 
 // DistanceAngle in radian.
 func (latlong *Point) DistanceAngle(latlong1 *Point) s1.Angle {
-	return latlong.Distance(latlong1.LatLng)
+	return latlong.S2LatLng().Distance(latlong1.S2LatLng())
 }
 
 // DistanceEarthKm in km at surface.
@@ -107,21 +105,13 @@ func (latlong *Point) DistanceEarthKm(latlong1 *Point) Km {
 	return EarthArcFromAngle(latlong.DistanceAngle(latlong1))
 }
 
-func (latlong Point) latpreclog() (latprec int) {
-	if latlong.lngprec.Degrees() != 0 {
-		latprec = int(math.Ceil(-math.Log10(latlong.latprec.Degrees())))
-		if latprec < 0 {
-			latprec = 0
-		}
-	} else {
-		latprec = 2
-	}
-	return
+func (latlong Point) latpreclog() int {
+	return latlong.lat.preclog()
 }
 
 // LatString is string getter for latitude
 func (latlong Point) LatString() (s string) {
-	lat := latlong.Lat.Degrees()
+	lat := latlong.Lat().Degrees()
 	if lat >= 0 {
 		s += fmt.Sprintf(msgCatalog[Config.Lang].latN, strconv.FormatFloat(lat, 'f', latlong.latpreclog(), 64))
 	} else {
@@ -133,24 +123,16 @@ func (latlong Point) LatString() (s string) {
 
 // latString is string getter for latitude
 func (latlong Point) latString() string {
-	return strconv.FormatFloat(latlong.Lat.Degrees(), 'f', latlong.latpreclog(), 64)
+	return strconv.FormatFloat(latlong.Lat().Degrees(), 'f', latlong.latpreclog(), 64)
 }
 
-func (latlong Point) lngpreclog() (lngprec int) {
-	if latlong.lngprec.Degrees() != 0 {
-		lngprec = int(math.Ceil(-math.Log10(latlong.lngprec.Degrees())))
-		if lngprec < 0 {
-			lngprec = 0
-		}
-	} else {
-		lngprec = 2
-	}
-	return
+func (latlong Point) lngpreclog() int {
+	return latlong.lng.preclog()
 }
 
 // LngString is string getter for longitude
 func (latlong Point) LngString() (s string) {
-	lng := latlong.Lng.Degrees()
+	lng := latlong.Lng().Degrees()
 	if lng >= 0 {
 		s += fmt.Sprintf(msgCatalog[Config.Lang].lngE, strconv.FormatFloat(lng, 'f', latlong.lngpreclog(), 64))
 	} else {
@@ -162,7 +144,7 @@ func (latlong Point) LngString() (s string) {
 
 // lngString is string getter for longitude
 func (latlong Point) lngString() string {
-	return strconv.FormatFloat(latlong.Lng.Degrees(), 'f', latlong.lngpreclog(), 64)
+	return strconv.FormatFloat(latlong.Lng().Degrees(), 'f', latlong.lngpreclog(), 64)
 }
 
 func getAlt(part []byte) (altitude *float64) {
@@ -191,167 +173,22 @@ func (latlong Point) String() string {
 
 // PrecisionArea returns area size of precicion.
 func (latlong Point) PrecisionArea() float64 {
-	return latlong.latprec.Degrees() * latlong.lngprec.Degrees()
+	return latlong.lat.PrecDegrees() * latlong.lng.PrecDegrees()
 }
 
 // PrecString is Precision String()
 func (latlong Point) PrecString() (s string) {
 	if Config.Lang == "ja" {
-		s = fmt.Sprintf("緯度誤差%f度、経度誤差%f度", latlong.latprec, latlong.lngprec)
+		s = fmt.Sprintf("緯度誤差%f度、経度誤差%f度", latlong.lat.PrecDegrees(), latlong.lng.PrecDegrees())
 	} else {
-		s = fmt.Sprintf("lat. error %fdeg., long. error %fdeg.", latlong.latprec, latlong.lngprec)
+		s = fmt.Sprintf("lat. error %fdeg., long. error %fdeg.", latlong.lat.PrecDegrees(), latlong.lng.PrecDegrees())
 	}
 	return
 }
 
 // MapsLatLng return maps.LatLng ( "googlemaps.github.io/maps" )
 func (latlong Point) MapsLatLng() maps.LatLng {
-	return maps.LatLng{Lat: latlong.Lat.Degrees(), Lng: latlong.Lng.Degrees()}
-}
-
-func isErrorDeg(deg float64, degprec float64) bool {
-	degerr, degprecerr := getErrorDeg()
-	if deg == degerr && degprec == degprecerr {
-		return true
-	}
-	return false
-}
-
-func getErrorDeg() (deg float64, degprec float64) {
-	deg = 0
-	degprec = 360
-	return
-}
-
-func getDeg(part []byte, pos int) (deg float64, degprec float64) {
-	var err error
-	deg, err = strconv.ParseFloat(string(part), 64)
-	if err != nil {
-		deg, degprec = getErrorDeg()
-		return
-	}
-
-	if l := len(part); l == pos {
-		degprec = 1
-	} else {
-		degprec = math.Pow10(pos - l + 1)
-	}
-	return
-}
-
-func getDegMin(part []byte, pos int) (deg float64, degprec float64) {
-	var err error
-	if deg, err = strconv.ParseFloat(string(part[1:pos-2]), 64); err != nil {
-		deg, degprec = getErrorDeg()
-		return
-	}
-
-	var min float64
-	if min, err = strconv.ParseFloat(string(part[pos-2:]), 64); err != nil {
-		deg, degprec = getErrorDeg()
-		return
-	}
-	deg += min / 60
-
-	switch part[0] {
-	case '-':
-		deg = -deg
-	case '+':
-		break
-	default:
-		deg, degprec = getErrorDeg()
-		return
-	}
-
-	if l := len(part); l == pos {
-		degprec = float64(1) / 60
-	} else {
-		degprec = math.Pow10(pos-l+1) / 60
-	}
-
-	return
-}
-
-func getDegMinSec(part []byte, pos int) (deg float64, degprec float64) {
-	var err error
-	if deg, err = strconv.ParseFloat(string(part[1:pos-4]), 64); err != nil {
-		deg, degprec = getErrorDeg()
-		return
-	}
-
-	var min float64
-	if min, err = strconv.ParseFloat(string(part[pos-4:pos-2]), 64); err != nil {
-		deg, degprec = getErrorDeg()
-		return
-	}
-	deg += min / 60
-
-	var sec float64
-	if sec, err = strconv.ParseFloat(string(part[pos-2:]), 64); err != nil {
-		deg, degprec = getErrorDeg()
-		return
-	}
-	deg += sec / 3600
-
-	switch part[0] {
-	case '-':
-		deg = -deg
-	case '+':
-		break
-	default:
-		deg, degprec = getErrorDeg()
-		return
-	}
-
-	if l := len(part); l == pos {
-		degprec = float64(1) / 3600
-	} else {
-		degprec = math.Pow10(pos-l+1) / 3600
-	}
-
-	return
-}
-
-func getLat(part []byte) (latitude float64, latprec float64) {
-	part = bytes.TrimSpace(part)
-	pos := bytes.Index(part, []byte(`.`))
-	if pos == -1 {
-		pos = len(part)
-	}
-
-	if pos < 2 && false {
-		latitude, latprec = getErrorDeg()
-	} else if pos < 4 {
-		latitude, latprec = getDeg(part, pos)
-	} else if pos < 6 {
-		latitude, latprec = getDegMin(part, pos)
-	} else if pos < 8 {
-		latitude, latprec = getDegMinSec(part, pos)
-	} else {
-		latitude, latprec = getErrorDeg()
-	}
-	return
-}
-
-func getLng(part []byte) (longitude float64, longprec float64) {
-	part = bytes.TrimSpace(part)
-	pos := bytes.Index(part, []byte(`.`))
-	if pos == -1 {
-		pos = len(part)
-	}
-
-	if pos < 3 && false {
-		longitude, longprec = getErrorDeg()
-	} else if pos < 5 {
-		longitude, longprec = getDeg(part, pos)
-	} else if pos < 7 {
-		longitude, longprec = getDegMin(part, pos)
-	} else if pos < 9 {
-		longitude, longprec = getDegMinSec(part, pos)
-	} else {
-		longitude, longprec = getErrorDeg()
-	}
-	return
+	return maps.LatLng{Lat: latlong.Lat().Degrees(), Lng: latlong.Lng().Degrees()}
 }
 
 type config struct {
@@ -382,11 +219,8 @@ func (latlong Point) MarshalJSON() ([]byte, error) {
 		ll = make([]Angle, 2)
 	}
 
-	ll[0].radian = latlong.LatLng.Lng
-	ll[0].radianprec = latlong.lngprec
-
-	ll[1].radian = latlong.LatLng.Lat
-	ll[1].radianprec = latlong.latprec
+	ll[0] = latlong.lng
+	ll[1] = latlong.lat
 
 	return json.Marshal(&ll)
 }
@@ -401,11 +235,8 @@ func (latlong *Point) UnmarshalJSON(data []byte) (err error) {
 		return errors.New("unknown JSON Coordinate format")
 	}
 
-	latlong.LatLng.Lng = ll[0].radian
-	latlong.lngprec = ll[0].radianprec
-
-	latlong.LatLng.Lat = ll[1].radian
-	latlong.latprec = ll[1].radianprec
+	latlong.lng = ll[0]
+	latlong.lat = ll[1]
 
 	if len(ll) > 2 {
 		altitude := ll[2].radian.Degrees()
@@ -459,8 +290,12 @@ func (latlong Point) altString() string {
 func (latlong Point) NewGeoJSONGeometry() *GeoJSONGeometry {
 	var g GeoJSONGeometry
 	g.Type = "Point"
-	g.Coordinates = make([]interface{}, 1)
-	g.Coordinates[0] = latlong
+
+	var err error
+	g.Coordinates, err = json.Marshal(&latlong)
+	if err != nil {
+		panic("Error")
+	}
 
 	return &g
 }

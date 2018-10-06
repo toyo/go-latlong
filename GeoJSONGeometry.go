@@ -1,14 +1,16 @@
 package latlong
 
 import (
+	"encoding/json"
+
 	"github.com/golang/geo/s2"
 )
 
 // GeoJSONGeometry is Geometry of GeoJSON
 type GeoJSONGeometry struct {
-	Type        string        `json:"type"`
-	Coordinates []interface{} `json:"coordinates"`
-	Radius      *float64      `json:"radius,omitempty"` // only for Circle, which is GeoJSON specification 1.1 and leter.
+	Type        string          `json:"type"`
+	Coordinates json.RawMessage `json:"coordinates"`
+	Radius      *float64        `json:"radius,omitempty"` // only for Circle, which is GeoJSON specification 1.1 and leter.
 }
 
 // Equal return equal or not.
@@ -40,26 +42,48 @@ func (geom GeoJSONGeometry) S2Region() s2.Region {
 	return s2.EmptyRect()
 }
 
+// S2Point is getter for center of s2.Point.
+func (geom GeoJSONGeometry) S2Point() s2.Point {
+	switch geom.Type {
+	case "Point":
+		c := geom.Point().S2Point()
+		return c
+	case "Circle":
+		c := geom.Circle().S2Point()
+		return c
+	case "LineString":
+		c := geom.LineString().S2Point()
+		return c
+	case "Polygon":
+		c := geom.Polygon().S2Point()
+		return c
+	}
+	panic(geom.Type)
+}
+
+func (geom GeoJSONGeometry) S2LatLng() s2.LatLng {
+	return s2.LatLngFromPoint(geom.S2Point())
+}
+
 // Polygon extract Polygon
 func (geom GeoJSONGeometry) Polygon() *Polygon {
 	if geom.Type != "Polygon" {
 		return nil
 	}
-	switch len(geom.Coordinates) {
+	var co []MultiPoint
+	err := json.Unmarshal(geom.Coordinates, &co)
+	if err != nil {
+		panic("Error")
+	}
+
+	switch len(co) {
 	case 0:
 		panic("No Polygon!")
 	case 1:
-		coor := geom.Coordinates[0].([]interface{})
-		mp := make(MultiPoint, len(coor))
-		for i := range coor {
-			g := coor[i].([]interface{})
-			mp[i] = NewPoint(g[1].(float64), g[0].(float64), 0, 0)
-		}
-		return &Polygon{MultiPoint: mp}
+		return &Polygon{MultiPoint: co[0]}
 	default:
 		panic("Polygon has hole! Not implemented")
 	}
-
 }
 
 // LineString extract LineString
@@ -67,13 +91,13 @@ func (geom GeoJSONGeometry) LineString() *LineString {
 	if geom.Type != "LineString" {
 		return nil
 	}
-	coor := geom.Coordinates
-	mp := make(MultiPoint, len(coor))
-	for i := range coor {
-		g := coor[i].([]interface{})
-		mp[i] = NewPoint(g[1].(float64), g[0].(float64), 0, 0)
+	var coor MultiPoint
+	err := json.Unmarshal(geom.Coordinates, &coor)
+	if err != nil {
+		panic("Error")
 	}
-	return &LineString{MultiPoint: mp}
+
+	return &LineString{MultiPoint: coor}
 }
 
 // Circle extract Circle
@@ -81,13 +105,32 @@ func (geom GeoJSONGeometry) Circle() (ls *Circle) {
 	if geom.Type != "Circle" {
 		return nil
 	}
+	var coor Point
+	err := json.Unmarshal(geom.Coordinates, &coor)
+	if err != nil {
+		panic("Error")
+	}
 
 	radius := geom.Radius
 	if radius == nil {
 		ls = NewEmptyCircle()
 	} else {
-		ls = NewCircle(*NewPoint(geom.Coordinates[1].(float64), geom.Coordinates[0].(float64), 0, 0), Km(*radius))
+		ls = NewCircle(coor, Km(*radius))
 	}
 
 	return
+}
+
+// Point extract Point
+func (geom GeoJSONGeometry) Point() *Point {
+	if geom.Type != "Point" {
+		return nil
+	}
+	var coor Point
+	err := json.Unmarshal(geom.Coordinates, &coor)
+	if err != nil {
+		panic("Error")
+	}
+
+	return &coor
 }

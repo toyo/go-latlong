@@ -2,6 +2,7 @@ package latlong
 
 import (
 	"bytes"
+	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -55,7 +56,7 @@ func (cds *MultiPoint) Uniq() {
 		ls := *cds
 
 		l := len(ls)
-		if ls[l-2].Lat == ls[l-1].Lat && ls[l-2].Lng == ls[l-1].Lng { //Same point, different precision
+		if ls[l-2].Lat() == ls[l-1].Lat() && ls[l-2].Lng() == ls[l-1].Lng() { //Same point, different precision
 			if ls[l-2].PrecisionArea() < ls[l-1].PrecisionArea() {
 				ls.unset(l - 1)
 				ls.Uniq()
@@ -116,9 +117,10 @@ func (cds *MultiPoint) UnmarshalXML(d *xml.Decoder, start xml.StartElement) erro
 func (cds MultiPoint) NewGeoJSONGeometry() *GeoJSONGeometry {
 	var g GeoJSONGeometry
 	g.Type = "MultiPoint"
-	g.Coordinates = make([]interface{}, len(cds))
-	for i := range cds {
-		g.Coordinates[i] = cds[i]
+	var err error
+	g.Coordinates, err = json.Marshal(&cds)
+	if err != nil {
+		panic("Error")
 	}
 	return &g
 }

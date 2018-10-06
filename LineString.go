@@ -1,6 +1,8 @@
 package latlong
 
 import (
+	"encoding/json"
+
 	"github.com/golang/geo/s2"
 	"googlemaps.github.io/maps"
 )
@@ -26,6 +28,11 @@ func (cds LineString) S2Loop() *s2.Loop {
 	return lo
 }
 
+// S2Point is Center
+func (cds *LineString) S2Point() s2.Point {
+	return cds.S2Region().Centroid()
+}
+
 // MapsLatLng convert to google maps.
 func (cds LineString) MapsLatLng() (mlls []maps.LatLng) {
 	for _, cd := range cds.MultiPoint {
@@ -43,13 +50,44 @@ func (cds *LineString) S2Region() *s2.Polyline {
 	return &ps
 }
 
+// CapBound is for s2.Region interface.
+func (cds *LineString) CapBound() s2.Cap {
+	return cds.S2Region().CapBound()
+}
+
+// RectBound is for s2.Region interface.
+func (cds *LineString) RectBound() s2.Rect {
+	return cds.S2Region().RectBound()
+}
+
+// ContainsCell is for s2.Region interface.
+func (cds *LineString) ContainsCell(c s2.Cell) bool {
+	return cds.S2Region().ContainsCell(c)
+}
+
+// IntersectsCell is for s2.Region interface.
+func (cds *LineString) IntersectsCell(c s2.Cell) bool {
+	return cds.S2Region().IntersectsCell(c)
+}
+
+// ContainsPoint is for s2.Region interface.
+func (cds *LineString) ContainsPoint(p s2.Point) bool {
+	return cds.S2Region().ContainsPoint(p)
+}
+
+// CellUnionBound is for s2.Region interface.
+func (cds *LineString) CellUnionBound() []s2.CellID {
+	return cds.S2Region().CellUnionBound()
+}
+
 // NewGeoJSONGeometry returns GeoJSONGeometry.
 func (cds LineString) NewGeoJSONGeometry() *GeoJSONGeometry {
 	var g GeoJSONGeometry
 	g.Type = "LineString"
-	g.Coordinates = make([]interface{}, len(cds.MultiPoint))
-	for i := range cds.MultiPoint {
-		g.Coordinates[i] = cds.MultiPoint[i]
+	var err error
+	g.Coordinates, err = json.Marshal(&cds)
+	if err != nil {
+		panic("Error")
 	}
 	return &g
 }

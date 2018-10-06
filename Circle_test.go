@@ -2,18 +2,15 @@ package latlong_test
 
 import (
 	"encoding/json"
-	"math"
 	"testing"
 
-	"github.com/golang/geo/s2"
 	latlong "github.com/toyo/go-latlong"
 )
 
 func TestCircle(t *testing.T) {
-	circle := latlong.Circle{Point: latlong.Point{
-		LatLng: s2.LatLng{Lat: math.Pi * 35 / 180, Lng: math.Pi * 139 / 180}},
-		ChordAngle: latlong.Km(100).EarthChordAngle()}
-
+	circle := latlong.NewCircle(
+		*latlong.NewLatLongAlt(latlong.NewAngle(35, 0), latlong.NewAngle(139, 0), nil),
+		100)
 	b, err := json.Marshal(circle.NewGeoJSONGeometry())
 	if err != nil {
 		t.Errorf("Unmarshal error: %v", err)

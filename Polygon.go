@@ -1,6 +1,8 @@
 package latlong
 
 import (
+	"encoding/json"
+
 	"github.com/golang/geo/s2"
 )
 
@@ -22,13 +24,50 @@ func (cds *Polygon) S2Region() *s2.Loop {
 	return l
 }
 
+// CapBound is for s2.Region interface.
+func (cds *Polygon) CapBound() s2.Cap {
+	return cds.S2Region().CapBound()
+}
+
+// RectBound is for s2.Region interface.
+func (cds *Polygon) RectBound() s2.Rect {
+	return cds.S2Region().RectBound()
+}
+
+// ContainsCell is for s2.Region interface.
+func (cds *Polygon) ContainsCell(c s2.Cell) bool {
+	return cds.S2Region().ContainsCell(c)
+}
+
+// IntersectsCell is for s2.Region interface.
+func (cds *Polygon) IntersectsCell(c s2.Cell) bool {
+	return cds.S2Region().IntersectsCell(c)
+}
+
+// ContainsPoint is for s2.Region interface.
+func (cds *Polygon) ContainsPoint(p s2.Point) bool {
+	return cds.S2Region().ContainsPoint(p)
+}
+
+// CellUnionBound is for s2.Region interface.
+func (cds *Polygon) CellUnionBound() []s2.CellID {
+	return cds.S2Region().CellUnionBound()
+}
+
+// Center is Center LatLng
+func (cds *Polygon) S2Point() s2.Point {
+	return cds.S2Region().Centroid()
+}
+
 // NewGeoJSONGeometry returns GeoJSONGeometry.
 func (cds Polygon) NewGeoJSONGeometry() *GeoJSONGeometry {
 	var g GeoJSONGeometry
 	g.Type = "Polygon"
-	g.Coordinates = make([]interface{}, len(cds.MultiPoint))
-	for i := range cds.MultiPoint {
-		g.Coordinates[i] = cds.MultiPoint[i]
+	var err error
+	mmp := []MultiPoint{cds.MultiPoint}
+	g.Coordinates, err = json.Marshal(&mmp)
+	if err != nil {
+		panic("Error")
 	}
 	return &g
 }

@@ -33,7 +33,7 @@ func TestString(t *testing.T) {
 
 func TestPointJSON(t *testing.T) {
 	b := new(bytes.Buffer)
-	centerll := latlong.NewPoint(35.69, 139.71, 0.01, 0.01)
+	centerll := latlong.NewLatLongAlt(latlong.NewAngle(35.69, 0.01), latlong.NewAngle(139.71, 0.01), nil)
 	err := json.NewEncoder(b).Encode(centerll)
 	correctResponseJSON := []byte(`[139.71,35.69]
 `)
