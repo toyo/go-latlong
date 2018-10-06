@@ -29,20 +29,29 @@ func TestString(t *testing.T) {
 		t.Errorf("expected %+v, was %+v", correctResponselp, lp)
 	}
 
+}
+
+func TestPointJSON(t *testing.T) {
 	b := new(bytes.Buffer)
-	centerll := ll.Center()
+	centerll := latlong.NewPoint(35.69, 139.71, 0.01, 0.01)
 	err := json.NewEncoder(b).Encode(centerll)
-	correctResponseJSON := `[139.71,35.69]
-`
+	correctResponseJSON := []byte(`[139.71,35.69]
+`)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	JSON := b.String()
-	if JSON != correctResponseJSON {
+	JSON := b.Bytes()
+	if !bytes.Equal(JSON, correctResponseJSON) {
 		t.Errorf("expected '%+v', was '%+v'", correctResponseJSON, JSON)
-		t.Error(ll.Center().String())
-		t.Error(ll.Center().PrecString())
+	}
+
+	//t.Logf(`JSON=%s`, string(JSON))
+
+	var ll latlong.Point
+	json.NewDecoder(bytes.NewBuffer(JSON)).Decode(&ll)
+	if ll != *centerll {
+		t.Errorf("expected '%+v', was '%+v'", centerll, ll)
 	}
 }
 

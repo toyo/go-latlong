@@ -2,6 +2,7 @@ package latlong
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -371,54 +372,46 @@ var Config = config{
 
 // MarshalJSON is a marshaler for JSON.
 func (latlong Point) MarshalJSON() ([]byte, error) {
-	s := latlong.lngString() + "," + latlong.latString()
+	var ll []Angle
+
 	if latlong.alt != nil {
-		s += "," + latlong.altString()
+		ll = make([]Angle, 3)
+		ll[2].radian = s1.Angle(*latlong.alt) * s1.Degree
+		ll[2].radianprec = 1
+	} else {
+		ll = make([]Angle, 2)
 	}
-	return []byte("[" + s + "]"), nil
+
+	ll[0].radian = latlong.LatLng.Lng
+	ll[0].radianprec = latlong.lngprec
+
+	ll[1].radian = latlong.LatLng.Lat
+	ll[1].radianprec = latlong.latprec
+
+	return json.Marshal(&ll)
 }
 
 // UnmarshalJSON is a unmarshaler for JSON.
 func (latlong *Point) UnmarshalJSON(data []byte) (err error) {
-	s := bytes.TrimSpace(data)
+	var ll []Angle
 
-	if s[0] != '[' {
-		return errors.New("Unknown JSON format (not starting '[')")
-	}
-	s = s[1:]
+	err = json.Unmarshal(bytes.TrimSpace(data), &ll)
 
-	if s[len(s)-1] != ']' {
-		return errors.New("Unknown JSON format (not ending ']')")
-	}
-	s = s[:len(s)-1]
-
-	v := bytes.Split(s, []byte(","))
-	switch len(v) {
-	case 2:
-		lat, latprec := getLat(v[1])
-		if isErrorDeg(lat, latprec) {
-			err = fmt.Errorf("Error Degreee on JSON Lat %s", v[1])
-		}
-		lng, lngprec := getLng(v[0])
-		if isErrorDeg(lng, lngprec) {
-			err = fmt.Errorf("Error Degreee on JSON Lng %s", v[0])
-		}
-
-		*latlong = *NewLatLongAlt(lat, lng, latprec, lngprec, nil)
-	case 3:
-		lat, latprec := getLat(v[1])
-		if isErrorDeg(lat, latprec) {
-			err = fmt.Errorf("Error Degreee on JSON Lat %s", v[1])
-		}
-		lng, lngprec := getLng(v[0])
-		if isErrorDeg(lng, lngprec) {
-			err = fmt.Errorf("Error Degreee on JSON Lng %s", v[0])
-		}
-
-		*latlong = *NewLatLongAlt(lat, lng, latprec, lngprec, getAlt(v[2]))
-	default:
+	if len(ll) < 2 {
 		return errors.New("unknown JSON Coordinate format")
 	}
+
+	latlong.LatLng.Lng = ll[0].radian
+	latlong.lngprec = ll[0].radianprec
+
+	latlong.LatLng.Lat = ll[1].radian
+	latlong.latprec = ll[1].radianprec
+
+	if len(ll) > 2 {
+		altitude := ll[2].radian.Degrees()
+		latlong.alt = &altitude
+	}
+
 	return
 }
 
