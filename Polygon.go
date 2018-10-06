@@ -1,6 +1,8 @@
 package latlong
 
 import (
+	"encoding/json"
+
 	"github.com/golang/geo/s2"
 )
 
@@ -77,6 +79,30 @@ func (cds Polygon) S2Point() s2.Point {
 
 // Radiusp is un-used
 func (cds Polygon) Radiusp() *float64 {
+	return nil
+}
+
+// MarshalJSON is a marshaler for JSON.
+func (cds Polygon) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&[]MultiPoint{cds.MultiPoint})
+}
+
+// UnmarshalJSON is a unmarshaler for JSON.
+func (cds *Polygon) UnmarshalJSON(data []byte) (err error) {
+	var co []MultiPoint
+	err = json.Unmarshal(data, &co)
+	if err != nil {
+		panic(err)
+	}
+
+	switch len(co) {
+	case 0:
+		panic("No Polygon!")
+	case 1:
+		cds.MultiPoint = co[0]
+	default:
+		panic("Polygon has hole! Not implemented")
+	}
 	return nil
 }
 

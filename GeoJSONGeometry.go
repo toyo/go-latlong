@@ -90,65 +90,43 @@ func (geom GeoJSONGeometry) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON is a unmarshaler for JSON.
-func (geom *GeoJSONGeometry) UnmarshalJSON(data []byte) (err error) {
+func (geom *GeoJSONGeometry) UnmarshalJSON(data []byte) error {
 	var js struct {
 		Type        string          `json:"type"`
 		Coordinates json.RawMessage `json:"coordinates"`
 		Radius      *float64        `json:"radius,omitempty"` // only for Circle, which is GeoJSON specification 1.1 and leter.
 	}
 
-	err = json.Unmarshal(bytes.TrimSpace(data), &js)
-
+	err := json.Unmarshal(bytes.TrimSpace(data), &js)
+	if err != nil {
+		return err
+	}
 	switch js.Type {
 	case "Polygon":
-		var co []MultiPoint
-		err := json.Unmarshal(js.Coordinates, &co)
-		if err != nil {
-			panic("Error")
-		}
-
-		switch len(co) {
-		case 0:
-			panic("No Polygon!")
-		case 1:
-			geom.geo = Polygon{MultiPoint: co[0]}
-		default:
-			panic("Polygon has hole! Not implemented")
-		}
-		return nil
+		var p Polygon
+		err := json.Unmarshal(js.Coordinates, &p)
+		geom.geo = p
+		return err
 	case "LineString":
-		var coor MultiPoint
-		err := json.Unmarshal(js.Coordinates, &coor)
-		if err != nil {
-			panic("Error")
-		}
-		geom.geo = LineString{MultiPoint: coor}
-		return nil
+		var p LineString
+		err := json.Unmarshal(js.Coordinates, &p)
+		geom.geo = p
+		return err
+	case "Point":
+		var p Point
+		err := json.Unmarshal(js.Coordinates, &p)
+		geom.geo = p
+		return err
 	case "Circle":
-
-		var coor Point
-		err := json.Unmarshal(js.Coordinates, &coor)
-		if err != nil {
-			panic("Error")
-		}
-
+		var p Point
+		err := json.Unmarshal(js.Coordinates, &p)
 		radius := js.Radius
 		if radius == nil {
 			geom.geo = *NewEmptyCircle()
 		} else {
-			geom.geo = *NewCircle(coor, Km(*radius))
+			geom.geo = *NewCircle(p, Km(*radius))
 		}
-
-		return nil
-	case "Point":
-
-		var coor Point
-		err := json.Unmarshal(js.Coordinates, &coor)
-		if err != nil {
-			panic("Error")
-		}
-		geom.geo = coor
-		return nil
+		return err
 	case "Null":
 		geom.geo = nil
 		return nil

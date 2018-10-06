@@ -1,6 +1,8 @@
 package latlong
 
 import (
+	"encoding/json"
+
 	"github.com/golang/geo/s2"
 	"googlemaps.github.io/maps"
 )
@@ -86,6 +88,20 @@ func (cds *LineString) ContainsPoint(p s2.Point) bool {
 // CellUnionBound is for s2.Region interface.
 func (cds *LineString) CellUnionBound() []s2.CellID {
 	return cds.S2Region().CellUnionBound()
+}
+
+// MarshalJSON is a marshaler for JSON.
+func (cds LineString) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&cds.MultiPoint)
+}
+
+// UnmarshalJSON is a unmarshaler for JSON.
+func (cds *LineString) UnmarshalJSON(data []byte) (err error) {
+	err = json.Unmarshal(data, &cds.MultiPoint)
+	if err != nil {
+		panic(err)
+	}
+	return nil
 }
 
 // NewGeoJSONGeometry returns GeoJSONGeometry.
