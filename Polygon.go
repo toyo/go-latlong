@@ -54,7 +54,7 @@ func (cds *Polygon) CellUnionBound() []s2.CellID {
 	return cds.S2Region().CellUnionBound()
 }
 
-// Center is Center LatLng
+// S2Point is Center LatLng
 func (cds *Polygon) S2Point() s2.Point {
 	return cds.S2Region().Centroid()
 }

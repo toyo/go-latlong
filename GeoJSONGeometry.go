@@ -61,6 +61,7 @@ func (geom GeoJSONGeometry) S2Point() s2.Point {
 	panic(geom.Type)
 }
 
+// S2LatLng returns s2.LatLng
 func (geom GeoJSONGeometry) S2LatLng() s2.LatLng {
 	return s2.LatLngFromPoint(geom.S2Point())
 }

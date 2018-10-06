@@ -57,8 +57,8 @@ func (c *Circle) S2Region() s2.Cap {
 }
 
 // CapBound is for s2.Region interface.
-func (cds *Circle) CapBound() s2.Cap {
-	return cds.S2Region().CapBound()
+func (c *Circle) CapBound() s2.Cap {
+	return c.S2Region().CapBound()
 }
 
 // RectBound is for s2.Region interface.
@@ -95,7 +95,7 @@ func (c *Circle) String() string {
 	return c.Point.String() + "/" + c.Radius().String()
 }
 
-// Center is Center LatLng
+// S2Point is Center LatLng
 func (c *Circle) S2Point() s2.Point {
 	return c.Point.S2Point()
 }

@@ -75,8 +75,6 @@ func (cds *MultiPoint) Uniq() {
 }
 
 func (cds MultiPoint) String() string {
-	cds.Uniq()
-
 	var ss []string
 	for _, l := range cds {
 		ss = append(ss, l.String())

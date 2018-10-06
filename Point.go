@@ -60,14 +60,14 @@ func NewPointISO6709(iso6709 []byte) *Point {
 	return nil
 }
 
-func (latlong *Point) Lat() (a Angle) {
-	a = latlong.lat
-	return
+// Lat is getter for latitude.
+func (latlong *Point) Lat() Angle {
+	return latlong.lat
 }
 
-func (latlong *Point) Lng() (a Angle) {
-	a = latlong.lng
-	return
+// Lng is getter for longitude.
+func (latlong *Point) Lng() Angle {
+	return latlong.lng
 }
 
 // Equal is true if coordinate is same.
@@ -87,7 +87,7 @@ func (latlong *Point) Scan(state fmt.ScanState, verb rune) (err error) {
 
 // S2LatLng is getter for s2.LatLng
 func (latlong Point) S2LatLng() s2.LatLng {
-	return s2.LatLng{Lat: latlong.Lat().Radians(), Lng: latlong.Lng().Radians()}
+	return s2.LatLng{Lat: latlong.Lat().S1Angle(), Lng: latlong.Lng().S1Angle()}
 }
 
 // S2Point is getter for s2.Point
@@ -105,17 +105,13 @@ func (latlong *Point) DistanceEarthKm(latlong1 *Point) Km {
 	return EarthArcFromAngle(latlong.DistanceAngle(latlong1))
 }
 
-func (latlong Point) latpreclog() int {
-	return latlong.lat.preclog()
-}
-
 // LatString is string getter for latitude
 func (latlong Point) LatString() (s string) {
 	lat := latlong.Lat().Degrees()
 	if lat >= 0 {
-		s += fmt.Sprintf(msgCatalog[Config.Lang].latN, strconv.FormatFloat(lat, 'f', latlong.latpreclog(), 64))
+		s += fmt.Sprintf(msgCatalog[Config.Lang].latN, strconv.FormatFloat(lat, 'f', latlong.lat.preclog(), 64))
 	} else {
-		s += fmt.Sprintf(msgCatalog[Config.Lang].latS, strconv.FormatFloat(-lat, 'f', latlong.latpreclog(), 64))
+		s += fmt.Sprintf(msgCatalog[Config.Lang].latS, strconv.FormatFloat(-lat, 'f', latlong.lat.preclog(), 64))
 	}
 	//s += "精度" + strconv.FormatFloat(latlong.latprec.Degrees(), 'f', 5, 64)
 	return
@@ -123,20 +119,16 @@ func (latlong Point) LatString() (s string) {
 
 // latString is string getter for latitude
 func (latlong Point) latString() string {
-	return strconv.FormatFloat(latlong.Lat().Degrees(), 'f', latlong.latpreclog(), 64)
-}
-
-func (latlong Point) lngpreclog() int {
-	return latlong.lng.preclog()
+	return strconv.FormatFloat(latlong.Lat().Degrees(), 'f', latlong.lat.preclog(), 64)
 }
 
 // LngString is string getter for longitude
 func (latlong Point) LngString() (s string) {
 	lng := latlong.Lng().Degrees()
 	if lng >= 0 {
-		s += fmt.Sprintf(msgCatalog[Config.Lang].lngE, strconv.FormatFloat(lng, 'f', latlong.lngpreclog(), 64))
+		s += fmt.Sprintf(msgCatalog[Config.Lang].lngE, strconv.FormatFloat(lng, 'f', latlong.lng.preclog(), 64))
 	} else {
-		s += fmt.Sprintf(msgCatalog[Config.Lang].lngW, strconv.FormatFloat(-lng, 'f', latlong.lngpreclog(), 64))
+		s += fmt.Sprintf(msgCatalog[Config.Lang].lngW, strconv.FormatFloat(-lng, 'f', latlong.lng.preclog(), 64))
 	}
 	//s += "精度" + strconv.FormatFloat(latlong.lngprec.Degrees(), 'f', 5, 64)
 	return
@@ -144,7 +136,7 @@ func (latlong Point) LngString() (s string) {
 
 // lngString is string getter for longitude
 func (latlong Point) lngString() string {
-	return strconv.FormatFloat(latlong.Lng().Degrees(), 'f', latlong.lngpreclog(), 64)
+	return strconv.FormatFloat(latlong.Lng().Degrees(), 'f', latlong.lng.preclog(), 64)
 }
 
 func getAlt(part []byte) (altitude *float64) {

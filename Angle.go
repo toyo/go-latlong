@@ -9,41 +9,44 @@ import (
 	"github.com/golang/geo/s1"
 )
 
+// Angle is Angle with precision.
 type Angle struct {
 	radian     s1.Angle
 	radianprec s1.Angle
 }
 
+// NewAngle is constructor for Angle
 func NewAngle(degree, degreeprec float64) (a Angle) {
 	a.radian = s1.Angle(degree) * s1.Degree
 	a.radianprec = s1.Angle(degreeprec) * s1.Degree
 	return
 }
 
+// NewAngleFromS1Angle is constructor for Angle
 func NewAngleFromS1Angle(angle, angleprec s1.Angle) (a Angle) {
 	a.radian = angle
 	a.radianprec = angleprec
 	return
 }
 
-func (a Angle) Equal(a1 Angle) bool {
-	return a == a1
+// S1Angle returns s1.Angle
+func (a Angle) S1Angle() s1.Angle {
+	return a.radian
 }
 
+// Degrees returns Degree
 func (a Angle) Degrees() float64 {
-	return a.radian.Degrees()
+	return a.S1Angle().Degrees()
 }
 
-func (a Angle) PrecDegrees() float64 {
-	return a.radianprec.Degrees()
-}
-
+// PrecS1Angle returns precicion s1.Angle
 func (a Angle) PrecS1Angle() s1.Angle {
 	return a.radianprec
 }
 
-func (a Angle) Radians() s1.Angle {
-	return a.radian
+// PrecDegrees returns precicion Degree
+func (a Angle) PrecDegrees() float64 {
+	return a.PrecS1Angle().Degrees()
 }
 
 func (a Angle) preclog() (lngprec int) {
