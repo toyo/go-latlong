@@ -22,6 +22,11 @@ type Point struct {
 	alt *float64 // altitude
 }
 
+// Type returns this type
+func (Point) Type() string {
+	return "Point"
+}
+
 // NewLatLongAlt is from latitude, longitude and altitude.
 func NewLatLongAlt(lat, lng Angle, altitude *float64) *Point {
 	var latlongalt Point
@@ -71,8 +76,8 @@ func (latlong *Point) Lng() Angle {
 }
 
 // Equal is true if coordinate is same.
-func (latlong *Point) Equal(latlong1 *Point) bool {
-	return latlong.Lat() == latlong1.Lat() && latlong.Lng() == latlong1.Lng()
+func (latlong Point) Equal(latlong1 Geometry) bool {
+	return latlong == latlong1.(Point)
 }
 
 // Scan is for fmt.Scanner
@@ -93,6 +98,16 @@ func (latlong Point) S2LatLng() s2.LatLng {
 // S2Point is getter for s2.Point
 func (latlong Point) S2Point() s2.Point {
 	return s2.PointFromLatLng(latlong.S2LatLng())
+}
+
+// S2Region is getter for s2.Loop.
+func (latlong Point) S2Region() s2.Region {
+	return s2.PointFromLatLng(latlong.S2LatLng())
+}
+
+// Radiusp is un-used
+func (latlong Point) Radiusp() *float64 {
+	return nil
 }
 
 // DistanceAngle in radian.
@@ -279,17 +294,11 @@ func (latlong Point) altString() string {
 }
 
 // NewGeoJSONGeometry returns GeoJSONGeometry.
-func (latlong Point) NewGeoJSONGeometry() *GeoJSONGeometry {
+func (latlong Point) NewGeoJSONGeometry() GeoJSONGeometry {
 	var g GeoJSONGeometry
-	g.Type = "Point"
+	g.geo = latlong
 
-	var err error
-	g.Coordinates, err = json.Marshal(&latlong)
-	if err != nil {
-		panic("Error")
-	}
-
-	return &g
+	return g
 }
 
 // NewGeoJSONFeature returns GeoJSONFeature.

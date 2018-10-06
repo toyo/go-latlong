@@ -1,8 +1,6 @@
 package latlong
 
 import (
-	"encoding/json"
-
 	"github.com/golang/geo/s2"
 )
 
@@ -11,8 +9,26 @@ type Polygon struct {
 	MultiPoint
 }
 
+// Type returns this type
+func (Polygon) Type() string {
+	return "Polygon"
+}
+
+// S2Loop is getter for s2.Loop.
+func (cds Polygon) S2Loop() *s2.Loop {
+	ps := make(s2.Polyline, len(cds.MultiPoint))
+	for i := range cds.MultiPoint {
+		ps[i] = cds.MultiPoint[i].S2Point()
+	}
+	l := s2.LoopFromPoints(ps)
+	if !l.IsNormalized() {
+		l.Invert()
+	}
+	return l
+}
+
 // S2Region is getter for s2.Loop.
-func (cds *Polygon) S2Region() *s2.Loop {
+func (cds Polygon) S2Region() s2.Region {
 	ps := make(s2.Polyline, len(cds.MultiPoint))
 	for i := range cds.MultiPoint {
 		ps[i] = cds.MultiPoint[i].S2Point()
@@ -55,21 +71,20 @@ func (cds *Polygon) CellUnionBound() []s2.CellID {
 }
 
 // S2Point is Center LatLng
-func (cds *Polygon) S2Point() s2.Point {
-	return cds.S2Region().Centroid()
+func (cds Polygon) S2Point() s2.Point {
+	return cds.S2Loop().Centroid()
+}
+
+// Radiusp is un-used
+func (cds Polygon) Radiusp() *float64 {
+	return nil
 }
 
 // NewGeoJSONGeometry returns GeoJSONGeometry.
-func (cds Polygon) NewGeoJSONGeometry() *GeoJSONGeometry {
+func (cds Polygon) NewGeoJSONGeometry() GeoJSONGeometry {
 	var g GeoJSONGeometry
-	g.Type = "Polygon"
-	var err error
-	mmp := []MultiPoint{cds.MultiPoint}
-	g.Coordinates, err = json.Marshal(&mmp)
-	if err != nil {
-		panic("Error")
-	}
-	return &g
+	g.geo = cds
+	return g
 }
 
 // NewGeoJSONFeature returns GeoJSONFeature.

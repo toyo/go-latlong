@@ -1,8 +1,6 @@
 package latlong
 
 import (
-	"encoding/json"
-
 	"github.com/golang/geo/s2"
 	"googlemaps.github.io/maps"
 )
@@ -10,6 +8,11 @@ import (
 // LineString inherited MultiPoint
 type LineString struct {
 	MultiPoint
+}
+
+// Type returns this type
+func (LineString) Type() string {
+	return "LineString"
 }
 
 // S2Polyline is getter for s2.Polyline ([]s2.Point).
@@ -29,8 +32,8 @@ func (cds LineString) S2Loop() *s2.Loop {
 }
 
 // S2Point is Center
-func (cds *LineString) S2Point() s2.Point {
-	return cds.S2Region().Centroid()
+func (cds LineString) S2Point() s2.Point {
+	return cds.MultiPoint[0].S2Point()
 }
 
 // MapsLatLng convert to google maps.
@@ -42,12 +45,17 @@ func (cds LineString) MapsLatLng() (mlls []maps.LatLng) {
 }
 
 // S2Region is getter for s2.Polyline ([]s2.Point).
-func (cds *LineString) S2Region() *s2.Polyline {
+func (cds LineString) S2Region() s2.Region {
 	ps := make(s2.Polyline, len(cds.MultiPoint))
 	for i := range cds.MultiPoint {
 		ps[i] = cds.MultiPoint[i].S2Point()
 	}
 	return &ps
+}
+
+// Radiusp is un-used
+func (cds LineString) Radiusp() *float64 {
+	return nil
 }
 
 // CapBound is for s2.Region interface.
@@ -81,15 +89,10 @@ func (cds *LineString) CellUnionBound() []s2.CellID {
 }
 
 // NewGeoJSONGeometry returns GeoJSONGeometry.
-func (cds LineString) NewGeoJSONGeometry() *GeoJSONGeometry {
+func (cds LineString) NewGeoJSONGeometry() GeoJSONGeometry {
 	var g GeoJSONGeometry
-	g.Type = "LineString"
-	var err error
-	g.Coordinates, err = json.Marshal(&cds)
-	if err != nil {
-		panic("Error")
-	}
-	return &g
+	g.geo = cds
+	return g
 }
 
 // NewGeoJSONFeature returns GeoJSONFeature.

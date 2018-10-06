@@ -19,11 +19,11 @@ func TestGeoJSONGeometryLineString(t *testing.T) {
 		t.Errorf("Unmarshal error: %v", err)
 	}
 
-	lsp := geom.LineString()
+	lsp := geom.Geo()
 	if lsp == nil {
 		t.Errorf("LineString error: %v", err)
 	}
-	t.Logf("%s", lsp)
+	t.Logf("%s", lsp.(latlong.LineString))
 }
 
 func TestGeoJSONGeometryCircle(t *testing.T) {
@@ -42,11 +42,11 @@ func TestGeoJSONGeometryCircle(t *testing.T) {
 		t.Errorf("Unmarshal error: %v", err)
 	}
 
-	lsp := geom.Circle()
+	lsp := geom.Geo()
 	if lsp == nil {
 		t.Error("Circle error")
 	}
-	t.Logf("%s", lsp.String())
+	t.Logf("%s", lsp.(latlong.Circle).String())
 }
 
 func TestGeoJSONGeometryPolygon(t *testing.T) {
@@ -61,16 +61,16 @@ func TestGeoJSONGeometryPolygon(t *testing.T) {
 		t.Error("Unmarshal error")
 	}
 
-	lsp := geom.Polygon()
+	lsp := geom.Geo()
 	if lsp == nil {
 		t.Error("Polygon error")
 	}
-	t.Logf("%s", lsp)
+	t.Logf("%s", lsp.(latlong.Polygon))
 }
 
 func TestGeoJSONGeometryPoint(t *testing.T) {
-	llj := latlong.GeoJSONGeometry{Coordinates: json.RawMessage("[35,139]"), Type: "Point"}
-
+	p := latlong.NewPointISO6709([]byte(`+35.000+139.0000`))
+	llj := latlong.NewGeoJSONGeometry(p)
 	b, err := json.Marshal(llj)
 	if err != nil {
 		t.Errorf("Unmarshal error: %v", err)

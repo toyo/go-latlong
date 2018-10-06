@@ -23,9 +23,9 @@ func TestCircle(t *testing.T) {
 		t.Errorf("Unmarshal error: %v", err)
 	}
 
-	circle1 := geom.Circle()
+	circle1 := geom.Geo()
 	if circle1 == nil {
 		t.Error("Unmarshal error")
 	}
-	t.Logf("%s", circle1.String())
+	t.Logf("%s", circle1.(latlong.Circle).String())
 }

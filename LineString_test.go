@@ -4,24 +4,13 @@ import (
 	"encoding/xml"
 	"testing"
 
-	"github.com/golang/geo/r3"
-	"github.com/golang/geo/s2"
 	latlong "github.com/toyo/go-latlong"
 )
 
 func TestLineString(t *testing.T) {
 
 	const xmlstrings = `<ISO6709>+12+123/+12.3+123.4/+12.34+123.43/</ISO6709>`
-	var answer = s2.Polyline{
-		s2.Point{
-			Vector: r3.Vector{
-				X: -0.5327373653659239, Y: 0.8203436038418747, Z: 0.20791169081775934}},
-		s2.Point{
-			Vector: r3.Vector{
-				X: -0.5378447709118935, Y: 0.8156844101282474, Z: 0.21303038627497659}},
-		s2.Point{
-			Vector: r3.Vector{
-				X: -0.5381897230643339, Y: 0.8152783663496835, Z: 0.2137124407939944}}}
+
 	var ISO6709 latlong.LineString
 
 	err := xml.Unmarshal([]byte(xmlstrings), &ISO6709)
@@ -29,7 +18,19 @@ func TestLineString(t *testing.T) {
 		t.Errorf("Unmarshal error: %v", err)
 	}
 
-	if !answer.Equal(ISO6709.S2Region()) {
-		t.Errorf("TestLineString %#v", ISO6709.S2Region())
+	expct := *latlong.NewLatLongAlt(latlong.NewAngle(12, 1), latlong.NewAngle(123, 1), nil)
+	if ISO6709.MultiPoint[0] != expct {
+		t.Errorf("Not match got %#v expct %#v", ISO6709.MultiPoint[0], expct)
 	}
+
+	expct = *latlong.NewLatLongAlt(latlong.NewAngle(12.3, 0.1), latlong.NewAngle(123.4, 0.1), nil)
+	if ISO6709.MultiPoint[1] != expct {
+		t.Errorf("Not match got %#v expct %#v", ISO6709.MultiPoint[0], expct)
+	}
+
+	expct = *latlong.NewLatLongAlt(latlong.NewAngle(12.34, 0.01), latlong.NewAngle(123.43, 0.01), nil)
+	if ISO6709.MultiPoint[2] != expct {
+		t.Errorf("Not match got %#v expct %#v", ISO6709.MultiPoint[0], expct)
+	}
+
 }

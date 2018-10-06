@@ -2,21 +2,37 @@ package latlong
 
 import (
 	"bytes"
-	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
 	"reflect"
 	"strings"
+
+	"github.com/golang/geo/s2"
 )
 
 // MultiPoint is slice of *Point
-type MultiPoint []*Point
+type MultiPoint []Point
+
+// Type returns this type
+func (MultiPoint) Type() string {
+	return "MultiPoint"
+}
 
 // Point returns the first point.
-func (cds *MultiPoint) Point() *Point {
-	return (*cds)[0]
+func (cds MultiPoint) Point() Point {
+	return cds[0]
+}
+
+// S2Point is Center LatLng
+func (cds MultiPoint) S2Point() s2.Point {
+	return cds[0].S2Point()
+}
+
+// S2Region is nil
+func (cds MultiPoint) S2Region() s2.Region {
+	return nil
 }
 
 // NewMultiPointISO6709 is from ISO6709 latlongs.
@@ -26,7 +42,7 @@ func NewMultiPointISO6709(str []byte) *MultiPoint {
 		if len(s) != 0 {
 			l := NewPointISO6709(s)
 			if l != nil {
-				ll = append(ll, l)
+				ll = append(ll, *l)
 			} else {
 				return nil
 			}
@@ -111,16 +127,16 @@ func (cds *MultiPoint) UnmarshalXML(d *xml.Decoder, start xml.StartElement) erro
 	}
 }
 
+// Radiusp is un-used
+func (cds MultiPoint) Radiusp() *float64 {
+	return nil
+}
+
 // NewGeoJSONGeometry returns GeoJSONGeometry.
-func (cds MultiPoint) NewGeoJSONGeometry() *GeoJSONGeometry {
+func (cds MultiPoint) NewGeoJSONGeometry() GeoJSONGeometry {
 	var g GeoJSONGeometry
-	g.Type = "MultiPoint"
-	var err error
-	g.Coordinates, err = json.Marshal(&cds)
-	if err != nil {
-		panic("Error")
-	}
-	return &g
+	g.geo = cds
+	return g
 }
 
 // NewGeoJSONFeature returns GeoJSONFeature.
@@ -130,4 +146,19 @@ func (cds MultiPoint) NewGeoJSONFeature(property interface{}) *GeoJSONFeature {
 	g.Geometry = cds.NewGeoJSONGeometry()
 	g.Property = property
 	return &g
+}
+
+// Equal return bool
+func (cds MultiPoint) Equal(c1 Geometry) bool {
+	c := c1.(MultiPoint)
+	if len(cds) != len(c) {
+		return false
+	}
+	for i := range cds {
+		if cds[i] != c[i] {
+			return false
+		}
+	}
+
+	return true
 }

@@ -1,7 +1,6 @@
 package latlong
 
 import (
-	"encoding/json"
 	"math"
 
 	"github.com/golang/geo/s1"
@@ -12,6 +11,11 @@ import (
 type Circle struct {
 	Point
 	s1.ChordAngle
+}
+
+// Type returns this type
+func (Circle) Type() string {
+	return "Circle"
 }
 
 // NewCircle is constuctor for Circle
@@ -52,7 +56,7 @@ func NewEmptyCircle() *Circle {
 }
 
 // S2Region is getter for s2.Region.
-func (c *Circle) S2Region() s2.Cap {
+func (c Circle) S2Region() s2.Region {
 	return s2.CapFromCenterChordAngle(s2.PointFromLatLng(c.Point.S2LatLng()), c.ChordAngle)
 }
 
@@ -86,17 +90,23 @@ func (c *Circle) CellUnionBound() []s2.CellID {
 	return c.S2Region().CellUnionBound()
 }
 
+// Radiusp is un-used
+func (c Circle) Radiusp() *float64 {
+	r := float64(c.Radius())
+	return &r
+}
+
 // Radius returns radius of circle.
-func (c *Circle) Radius() Km {
+func (c Circle) Radius() Km {
 	return EarthArcFromChordAngle(c.ChordAngle)
 }
 
-func (c *Circle) String() string {
+func (c Circle) String() string {
 	return c.Point.String() + "/" + c.Radius().String()
 }
 
 // S2Point is Center LatLng
-func (c *Circle) S2Point() s2.Point {
+func (c Circle) S2Point() s2.Point {
 	return c.Point.S2Point()
 }
 
@@ -117,18 +127,9 @@ func (c *Circle) S2LatLngs(div int) (lls []s2.LatLng) {
 }
 
 // NewGeoJSONGeometry returns GeoJSONGeometry.
-func (c Circle) NewGeoJSONGeometry() *GeoJSONGeometry {
-	var g GeoJSONGeometry
-	g.Type = "Circle"
-	var err error
-	g.Coordinates, err = json.Marshal(&c.Point)
-	if err != nil {
-		panic("Error")
-	}
-	radius := float64(c.Radius())
-	g.Radius = &radius
-
-	return &g
+func (c Circle) NewGeoJSONGeometry() (g GeoJSONGeometry) {
+	g.geo = c
+	return
 }
 
 // NewGeoJSONFeature returns GeoJSONFeature.
@@ -150,4 +151,9 @@ func (c *Circle) LatLngs(div int) (lls []Point) {
 		lls = append(lls, ll)
 	}
 	return
+}
+
+// Equal return bool
+func (c Circle) Equal(c1 Geometry) bool {
+	return c == c1
 }
