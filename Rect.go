@@ -142,7 +142,6 @@ loop:
 		case 0:
 			lonprec /= 24
 			if lonprec*floaterr < rect.Size().Lng.Degrees() {
-				//fmt.Printf("lon %.15f, %.15f", lonprec, latlong.Size().Lng.Degrees())
 				break loop
 			}
 			c := math.Floor(longitude / lonprec)
@@ -151,7 +150,6 @@ loop:
 		case 1:
 			latprec /= 24
 			if latprec*floaterr < rect.Size().Lat.Degrees() {
-				//fmt.Printf("lat %.15f, %.15f", latprec, latlong.Size().Lat.Degrees())
 				break loop
 			}
 			c := math.Floor(latitude / latprec)
@@ -160,7 +158,6 @@ loop:
 		case 2:
 			lonprec /= 10
 			if lonprec*floaterr < rect.Size().Lng.Degrees() {
-				//fmt.Printf("lon %.15f, %.15f", lonprec, latlong.Size().Lng.Degrees())
 				break loop
 			}
 			c := math.Floor(longitude / lonprec)
@@ -170,7 +167,6 @@ loop:
 		case 3:
 			latprec /= 10
 			if latprec*floaterr < rect.Size().Lat.Degrees() {
-				//fmt.Printf("lat %.15f, %.15f", latprec, latlong.Size().Lat.Degrees())
 				break loop
 			}
 			c := math.Floor(latitude / latprec)
@@ -190,7 +186,6 @@ loop:
 func NewRectGeoHash(geoHash string) (latlong *Rect, err error) {
 	if bb := geohash.Decode(geoHash); bb != nil {
 		latlong = NewRect(bb.Center().Lat(), bb.Center().Lng(), bb.NorthEast().Lat()-bb.SouthWest().Lat(), bb.NorthEast().Lng()-bb.SouthWest().Lng())
-		//fmt.Println(bb.NorthEast(), bb.SouthWest())
 	} else {
 		err = errors.New("Geohash decode error")
 	}
@@ -217,11 +212,7 @@ func (rect *Rect) GeoHash() string {
 
 	geohashlatbits := -math.Log2(rect.Size().Lat.Degrees()/45) + 2 // div by 180 = 45 * 2^2
 	geohashlngbits := -math.Log2(rect.Size().Lng.Degrees()/45) + 3 // div by 360 = 45 * 2^3
-	//fmt.Printf("lat %.99f, lng %.99f\n", geohashlatbits, geohashlngbits)
-	//fmt.Printf("lat %.9f, lng %.9f\n", latlong.Size().Lat.Degrees(), latlong.Size().Lng.Degrees())
-
 	geohashlat2len, geohashlatlen2mod := math.Modf(geohashlatbits / 5 * floaterr)
-	//fmt.Printf("lat %f mod %f\n", geohashlat2len, geohashlatlen2mod)
 
 	var geohashlatlen int
 	if geohashlatlen2mod >= 0.4 {
@@ -231,7 +222,6 @@ func (rect *Rect) GeoHash() string {
 	}
 
 	geohashlng2len, geohashlnglen2mod := math.Modf(geohashlngbits / 5 * floaterr)
-	//fmt.Printf("lng %f mod %f\n", geohashlng2len, geohashlnglen2mod)
 
 	var geohashlnglen int
 	if geohashlnglen2mod >= 0.6 {
@@ -239,10 +229,19 @@ func (rect *Rect) GeoHash() string {
 	} else {
 		geohashlnglen = int(geohashlng2len) * 2
 	}
-	//fmt.Printf("%d, %d\n", geohashlatlen, geohashlnglen)
 
 	if geohashlatlen < geohashlnglen {
 		return rect.geoHash(geohashlatlen)
 	}
 	return rect.geoHash(geohashlnglen)
+}
+
+// S2Rect returns s2.Rect.
+func (rect *Rect) S2Rect() s2.Rect {
+	return rect.Rect
+}
+
+// S2Region is getter for s2.Region.
+func (rect *Rect) S2Region() s2.Region {
+	return rect.S2Rect()
 }

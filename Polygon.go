@@ -29,47 +29,39 @@ func (cds Polygon) S2Loop() *s2.Loop {
 	return l
 }
 
-// S2Region is getter for s2.Loop.
+// S2Region is getter for s2.Region.
 func (cds Polygon) S2Region() s2.Region {
-	ps := make(s2.Polyline, len(cds.MultiPoint))
-	for i := range cds.MultiPoint {
-		ps[i] = cds.MultiPoint[i].S2Point()
-	}
-	l := s2.LoopFromPoints(ps)
-	if !l.IsNormalized() {
-		l.Invert()
-	}
-	return l
+	return cds.S2Loop()
 }
 
 // CapBound is for s2.Region interface.
 func (cds *Polygon) CapBound() s2.Cap {
-	return cds.S2Region().CapBound()
+	return cds.S2Loop().CapBound()
 }
 
 // RectBound is for s2.Region interface.
 func (cds *Polygon) RectBound() s2.Rect {
-	return cds.S2Region().RectBound()
+	return cds.S2Loop().RectBound()
 }
 
 // ContainsCell is for s2.Region interface.
 func (cds *Polygon) ContainsCell(c s2.Cell) bool {
-	return cds.S2Region().ContainsCell(c)
+	return cds.S2Loop().ContainsCell(c)
 }
 
 // IntersectsCell is for s2.Region interface.
 func (cds *Polygon) IntersectsCell(c s2.Cell) bool {
-	return cds.S2Region().IntersectsCell(c)
+	return cds.S2Loop().IntersectsCell(c)
 }
 
 // ContainsPoint is for s2.Region interface.
 func (cds *Polygon) ContainsPoint(p s2.Point) bool {
-	return cds.S2Region().ContainsPoint(p)
+	return cds.S2Loop().ContainsPoint(p)
 }
 
 // CellUnionBound is for s2.Region interface.
 func (cds *Polygon) CellUnionBound() []s2.CellID {
-	return cds.S2Region().CellUnionBound()
+	return cds.S2Loop().CellUnionBound()
 }
 
 // S2Point is Center LatLng

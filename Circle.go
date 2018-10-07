@@ -55,39 +55,44 @@ func NewEmptyCircle() *Circle {
 	return &circle
 }
 
+// S2Cap is getter for s2.Cap.
+func (c Circle) S2Cap() s2.Cap {
+	return s2.CapFromCenterChordAngle(s2.PointFromLatLng(c.Point.S2LatLng()), c.ChordAngle)
+}
+
 // S2Region is getter for s2.Region.
 func (c Circle) S2Region() s2.Region {
-	return s2.CapFromCenterChordAngle(s2.PointFromLatLng(c.Point.S2LatLng()), c.ChordAngle)
+	return c.S2Cap()
 }
 
 // CapBound is for s2.Region interface.
 func (c *Circle) CapBound() s2.Cap {
-	return c.S2Region().CapBound()
+	return c.S2Cap().CapBound()
 }
 
 // RectBound is for s2.Region interface.
 func (c *Circle) RectBound() s2.Rect {
-	return c.S2Region().RectBound()
+	return c.S2Cap().RectBound()
 }
 
 // ContainsCell is for s2.Region interface.
 func (c *Circle) ContainsCell(cell s2.Cell) bool {
-	return c.S2Region().ContainsCell(cell)
+	return c.S2Cap().ContainsCell(cell)
 }
 
 // IntersectsCell is for s2.Region interface.
 func (c *Circle) IntersectsCell(cell s2.Cell) bool {
-	return c.S2Region().IntersectsCell(cell)
+	return c.S2Cap().IntersectsCell(cell)
 }
 
 // ContainsPoint is for s2.Region interface.
 func (c *Circle) ContainsPoint(p s2.Point) bool {
-	return c.S2Region().ContainsPoint(p)
+	return c.S2Cap().ContainsPoint(p)
 }
 
 // CellUnionBound is for s2.Region interface.
 func (c *Circle) CellUnionBound() []s2.CellID {
-	return c.S2Region().CellUnionBound()
+	return c.S2Cap().CellUnionBound()
 }
 
 // Radiusp is un-used
@@ -120,10 +125,27 @@ func (c *Circle) S2Loop(div int) (loop *s2.Loop) {
 // radian is one vertex degree.
 func (c *Circle) S2LatLngs(div int) (lls []s2.LatLng) {
 	vs := c.S2Loop(div).Vertices()
+	lls = make([]s2.LatLng, len(vs))
 	for i := range vs {
-		lls = append(lls, s2.LatLngFromPoint(vs[i]))
+		lls[i] = s2.LatLngFromPoint(vs[i])
 	}
 	return
+}
+
+// MultiPoint is circumference loop by MultiPoint
+// radian is one vertex degree.
+func (c *Circle) MultiPoint(div int) (lls MultiPoint) {
+	vs := c.S2Loop(div).Vertices()
+	lls = make(MultiPoint, len(vs))
+	for i := range vs {
+		lls[i] = NewPointFromS2Point(vs[i])
+	}
+	return
+}
+
+// Equal return bool
+func (c Circle) Equal(c1 Geometry) bool {
+	return c == c1
 }
 
 // NewGeoJSONGeometry returns GeoJSONGeometry.
@@ -139,21 +161,4 @@ func (c Circle) NewGeoJSONFeature(property interface{}) *GeoJSONFeature {
 	g.Geometry = c.NewGeoJSONGeometry()
 	g.Property = property
 	return &g
-}
-
-// LatLngs is circumference loop by []LatLng.LatLngs
-// radian is one vertex degree.
-func (c *Circle) LatLngs(div int) (lls []Point) {
-	vs := c.S2Loop(div).Vertices()
-	for i := range vs {
-		s2ll := s2.LatLngFromPoint(vs[i])
-		ll := Point{lat: NewAngleFromS1Angle(s2ll.Lat, 0), lng: NewAngleFromS1Angle(s2ll.Lng, 0)}
-		lls = append(lls, ll)
-	}
-	return
-}
-
-// Equal return bool
-func (c Circle) Equal(c1 Geometry) bool {
-	return c == c1
 }

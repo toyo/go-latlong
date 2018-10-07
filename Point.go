@@ -65,6 +65,12 @@ func NewPointISO6709(iso6709 []byte) *Point {
 	return nil
 }
 
+// NewPointFromS2Point is from s2.Point
+func NewPointFromS2Point(p s2.Point) Point {
+	s2ll := s2.LatLngFromPoint(p)
+	return Point{lat: NewAngleFromS1Angle(s2ll.Lat, 0), lng: NewAngleFromS1Angle(s2ll.Lng, 0)}
+}
+
 // Lat is getter for latitude.
 func (latlong *Point) Lat() Angle {
 	return latlong.lat
