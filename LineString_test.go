@@ -19,17 +19,17 @@ func TestLineString(t *testing.T) {
 		t.Error(err)
 	}
 
-	expct := *latlong.NewLatLongAlt(latlong.NewAngle(12, 1), latlong.NewAngle(123, 1), nil)
+	expct := latlong.NewPoint(latlong.NewAngle(12, 1), latlong.NewAngle(123, 1), nil)
 	if ISO6709.MultiPoint[0] != expct {
 		t.Errorf("Not match got %#v expct %#v", ISO6709.MultiPoint[0], expct)
 	}
 
-	expct = *latlong.NewLatLongAlt(latlong.NewAngle(12.3, 0.1), latlong.NewAngle(123.4, 0.1), nil)
+	expct = latlong.NewPoint(latlong.NewAngle(12.3, 0.1), latlong.NewAngle(123.4, 0.1), nil)
 	if ISO6709.MultiPoint[1] != expct {
 		t.Errorf("Not match got %#v expct %#v", ISO6709.MultiPoint[0], expct)
 	}
 
-	expct = *latlong.NewLatLongAlt(latlong.NewAngle(12.34, 0.01), latlong.NewAngle(123.43, 0.01), nil)
+	expct = latlong.NewPoint(latlong.NewAngle(12.34, 0.01), latlong.NewAngle(123.43, 0.01), nil)
 	if ISO6709.MultiPoint[2] != expct {
 		t.Errorf("Not match got %#v expct %#v", ISO6709.MultiPoint[0], expct)
 	}

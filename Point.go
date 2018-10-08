@@ -27,17 +27,16 @@ func (Point) Type() string {
 	return "Point"
 }
 
-// NewLatLongAlt is from latitude, longitude and altitude.
-func NewLatLongAlt(lat, lng Angle, altitude *float64) *Point {
-	var latlongalt Point
+// NewPoint is from latitude, longitude and altitude.
+func NewPoint(lat, lng Angle, altitude *float64) (latlongalt Point) {
 	latlongalt.lat = lat
 	latlongalt.lng = lng
 	latlongalt.alt = altitude
-	return &latlongalt
+	return
 }
 
 // NewPointISO6709 is from ISO6709 string
-func NewPointISO6709(iso6709 []byte) *Point {
+func NewPointISO6709(iso6709 []byte) Point {
 	re := regexp.MustCompile(`(?P<Latitude>[\+-][\d.]+)(?P<Longitude>[\+-][\d.]+)(?P<Altitude>[\+-][\d.]+)?`)
 
 	if re.Match(iso6709) {
@@ -60,9 +59,9 @@ func NewPointISO6709(iso6709 []byte) *Point {
 				altitude = getAlt(match[i])
 			}
 		}
-		return NewLatLongAlt(lat, lng, altitude)
+		return NewPoint(lat, lng, altitude)
 	}
-	return nil
+	panic(iso6709)
 }
 
 // NewPointFromS2Point is from s2.Point
@@ -72,12 +71,12 @@ func NewPointFromS2Point(p s2.Point) Point {
 }
 
 // Lat is getter for latitude.
-func (latlong *Point) Lat() Angle {
+func (latlong Point) Lat() Angle {
 	return latlong.lat
 }
 
 // Lng is getter for longitude.
-func (latlong *Point) Lng() Angle {
+func (latlong Point) Lng() Angle {
 	return latlong.lng
 }
 
@@ -91,7 +90,7 @@ func (latlong *Point) Scan(state fmt.ScanState, verb rune) (err error) {
 	var token []byte
 	token, err = state.Token(false, nil)
 	if err == nil {
-		*latlong = *NewPointISO6709(token)
+		*latlong = NewPointISO6709(token)
 	}
 	return
 }
@@ -117,12 +116,12 @@ func (latlong Point) Radiusp() *float64 {
 }
 
 // DistanceAngle in radian.
-func (latlong *Point) DistanceAngle(latlong1 *Point) s1.Angle {
+func (latlong Point) DistanceAngle(latlong1 *Point) s1.Angle {
 	return latlong.S2LatLng().Distance(latlong1.S2LatLng())
 }
 
 // DistanceEarthKm in km at surface.
-func (latlong *Point) DistanceEarthKm(latlong1 *Point) Km {
+func (latlong Point) DistanceEarthKm(latlong1 *Point) Km {
 	return EarthArcFromAngle(latlong.DistanceAngle(latlong1))
 }
 

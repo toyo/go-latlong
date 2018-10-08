@@ -27,7 +27,7 @@ func (cds MultiPoint) Point() Point {
 
 // S2Point is Center LatLng
 func (cds MultiPoint) S2Point() s2.Point {
-	return cds[0].S2Point()
+	return cds.Point().S2Point()
 }
 
 // S2Region is nil
@@ -36,58 +36,21 @@ func (cds MultiPoint) S2Region() s2.Region {
 }
 
 // NewMultiPointISO6709 is from ISO6709 latlongs.
-func NewMultiPointISO6709(str []byte) *MultiPoint {
-	var ll MultiPoint
+func NewMultiPointISO6709(str []byte) (ll MultiPoint) {
 	for _, s := range bytes.Split(str, []byte(`/`)) {
 		if len(s) != 0 {
-			l := NewPointISO6709(s)
-			if l != nil {
-				ll = append(ll, *l)
-			} else {
-				return nil
-			}
+			ll = append(ll, NewPointISO6709(s))
 		}
 	}
-	return &ll
+	return
 }
 
-func (cds *MultiPoint) reverse() {
-	for i, j := 0, len(*cds)-1; i < j; i, j = i+1, j-1 {
-		(*cds)[i], (*cds)[j] = (*cds)[j], (*cds)[i]
+// Reverse returns reverse order.
+func (cds MultiPoint) Reverse() MultiPoint {
+	for i, j := 0, len(cds)-1; i < j; i, j = i+1, j-1 {
+		cds[i], cds[j] = cds[j], cds[i]
 	}
-}
-
-func (cds *MultiPoint) unset(i int) {
-	l := *cds
-	if i >= len(l) {
-		return
-	}
-	l = append(l[:i], l[i+1:]...)
-	*cds = l
-}
-
-// Uniq merge same element
-func (cds *MultiPoint) Uniq() {
-	if cds != nil && len(*cds) >= 2 {
-		ls := *cds
-
-		l := len(ls)
-		if ls[l-2].Lat() == ls[l-1].Lat() && ls[l-2].Lng() == ls[l-1].Lng() { //Same point, different precision
-			if ls[l-2].PrecisionArea() < ls[l-1].PrecisionArea() {
-				ls.unset(l - 1)
-				ls.Uniq()
-			} else {
-				ls.unset(l - 2)
-				ls.Uniq()
-			}
-		} else {
-			ll := ls[l-1]
-			lm := ls[:l-1]
-			lm.Uniq()
-			ls = append(lm, ll)
-		}
-		*cds = ls
-	}
+	return cds
 }
 
 func (cds MultiPoint) String() string {
@@ -112,12 +75,15 @@ func (cds *MultiPoint) UnmarshalXML(d *xml.Decoder, start xml.StartElement) erro
 
 		switch t := token.(type) {
 		case xml.CharData:
+			if len(t) == 0 {
+				continue
+			}
 			b := NewMultiPointISO6709(t)
 			if b == nil {
 				return errors.New("Unexpected CharData on Coordinates UnmarshalXML")
 			}
-			for i := range *b {
-				*cds = append(*cds, (*b)[i])
+			for i := range b {
+				*cds = append(*cds, b[i])
 			}
 		case xml.EndElement:
 			return nil

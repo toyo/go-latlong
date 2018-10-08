@@ -9,7 +9,7 @@ import (
 
 func TestCircle(t *testing.T) {
 	circle := latlong.NewCircle(
-		*latlong.NewLatLongAlt(latlong.NewAngle(35, 0), latlong.NewAngle(139, 0), nil),
+		latlong.NewPoint(latlong.NewAngle(35, 0), latlong.NewAngle(139, 0), nil),
 		100)
 	b, err := json.Marshal(circle.NewGeoJSONGeometry())
 	if err != nil {
