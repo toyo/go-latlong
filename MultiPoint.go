@@ -22,6 +22,9 @@ func (MultiPoint) Type() string {
 
 // Point returns the first point.
 func (cds MultiPoint) Point() Point {
+	if len(cds) == 0 {
+		panic(cds)
+	}
 	return cds[0]
 }
 

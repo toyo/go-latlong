@@ -33,7 +33,7 @@ func main() {
 |Class of this library|s2geometry.io|GeoJSON|memo|
 |---|---|---|---|
 |Point  |s2.LatLng (+altitude)  |Point||
-|MultiPoint (= []*Point )|-|MultiPoint|is for ISO6709|
+|MultiPoint (= []Point )|-|MultiPoint|is for ISO6709|
 |LineString | s2.Polyline |LineString ||
 |Polygon    | s2.Loop     |Polygon    |with no hole|
 |Circle     | s2.Cap      |Circle     |GeoJSON 1.1|
