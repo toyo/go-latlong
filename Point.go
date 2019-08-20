@@ -299,11 +299,11 @@ func (latlong Point) altString() string {
 }
 
 // NewGeoJSONGeometry returns GeoJSONGeometry.
-func (latlong Point) NewGeoJSONGeometry() GeoJSONGeometry {
+func (latlong Point) NewGeoJSONGeometry() *GeoJSONGeometry {
 	var g GeoJSONGeometry
 	g.geo = latlong
 
-	return g
+	return &g
 }
 
 // NewGeoJSONFeature returns GeoJSONFeature.

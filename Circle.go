@@ -149,9 +149,10 @@ func (c Circle) Equal(c1 Geometry) bool {
 }
 
 // NewGeoJSONGeometry returns GeoJSONGeometry.
-func (c Circle) NewGeoJSONGeometry() (g GeoJSONGeometry) {
+func (c Circle) NewGeoJSONGeometry() *GeoJSONGeometry {
+	var g GeoJSONGeometry
 	g.geo = c
-	return
+	return &g
 }
 
 // NewGeoJSONFeature returns GeoJSONFeature.

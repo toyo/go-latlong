@@ -105,10 +105,10 @@ func (cds *LineString) UnmarshalJSON(data []byte) (err error) {
 }
 
 // NewGeoJSONGeometry returns GeoJSONGeometry.
-func (cds LineString) NewGeoJSONGeometry() GeoJSONGeometry {
+func (cds LineString) NewGeoJSONGeometry() *GeoJSONGeometry {
 	var g GeoJSONGeometry
 	g.geo = cds
-	return g
+	return &g
 }
 
 // NewGeoJSONFeature returns GeoJSONFeature.

@@ -102,10 +102,10 @@ func (cds MultiPoint) Radiusp() *float64 {
 }
 
 // NewGeoJSONGeometry returns GeoJSONGeometry.
-func (cds MultiPoint) NewGeoJSONGeometry() GeoJSONGeometry {
+func (cds MultiPoint) NewGeoJSONGeometry() *GeoJSONGeometry {
 	var g GeoJSONGeometry
 	g.geo = cds
-	return g
+	return &g
 }
 
 // NewGeoJSONFeature returns GeoJSONFeature.

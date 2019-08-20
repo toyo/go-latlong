@@ -99,10 +99,10 @@ func (cds *Polygon) UnmarshalJSON(data []byte) (err error) {
 }
 
 // NewGeoJSONGeometry returns GeoJSONGeometry.
-func (cds Polygon) NewGeoJSONGeometry() GeoJSONGeometry {
+func (cds Polygon) NewGeoJSONGeometry() *GeoJSONGeometry {
 	var g GeoJSONGeometry
 	g.geo = cds
-	return g
+	return &g
 }
 
 // NewGeoJSONFeature returns GeoJSONFeature.
