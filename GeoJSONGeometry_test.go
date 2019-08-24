@@ -69,7 +69,8 @@ func TestGeoJSONGeometryPolygon(t *testing.T) {
 }
 
 func TestGeoJSONGeometryPoint(t *testing.T) {
-	p := latlong.NewPointISO6709([]byte(`+35.000+139.0000`))
+	var p latlong.Point
+	err := p.UnmarshalText([]byte(`+35.000+139.0000`))
 	llj := latlong.NewGeoJSONGeometry(p)
 	b, err := json.Marshal(llj)
 	if err != nil {

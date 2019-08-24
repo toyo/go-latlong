@@ -17,6 +17,11 @@ func (LineString) Type() string {
 	return "LineString"
 }
 
+// UnmarshalText is from ISO6709 latlongs.
+func (cds *LineString) UnmarshalText(b []byte) error {
+	return cds.MultiPoint.UnmarshalText(b)
+}
+
 // S2Polyline is getter for s2.Polyline ([]s2.Point).
 func (cds LineString) S2Polyline() s2.Polyline {
 	var ps s2.Polyline

@@ -2,11 +2,7 @@ package latlong
 
 import (
 	"bytes"
-	"encoding/xml"
-	"errors"
-	"fmt"
-	"io"
-	"reflect"
+	"encoding/json"
 	"strings"
 
 	"github.com/golang/geo/s2"
@@ -38,14 +34,31 @@ func (cds MultiPoint) S2Region() s2.Region {
 	return nil
 }
 
-// NewMultiPointISO6709 is from ISO6709 latlongs.
-func NewMultiPointISO6709(str []byte) (ll MultiPoint) {
+// UnmarshalText is from ISO6709 latlongs.
+func (cds *MultiPoint) UnmarshalText(str []byte) error {
 	for _, s := range bytes.Split(str, []byte(`/`)) {
 		if len(s) != 0 {
-			ll = append(ll, NewPointISO6709(s))
+			var p Point
+			err := p.UnmarshalText(s)
+			if err != nil {
+				return err
+			}
+			*cds = append(*cds, p)
 		}
 	}
-	return
+	return nil
+}
+
+// UnmarshalJSON is from ISO6709 latlongs.
+func (cds *MultiPoint) UnmarshalJSON(str []byte) error {
+	var v []Point
+
+	if err := json.Unmarshal(str, &v); err != nil {
+		return err
+	}
+
+	*cds = v
+	return nil
 }
 
 // Reverse returns reverse order.
@@ -62,38 +75,6 @@ func (cds MultiPoint) String() string {
 		ss = append(ss, l.String())
 	}
 	return strings.Join(ss, ",")
-}
-
-// UnmarshalXML is Unmarshal function.
-func (cds *MultiPoint) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	for {
-		token, err := d.Token()
-		if err != nil {
-			return err
-		}
-		if token == io.EOF {
-			err = errors.New("Unexpected EOF on LatLongs")
-			return err
-		}
-
-		switch t := token.(type) {
-		case xml.CharData:
-			if len(t) == 0 {
-				continue
-			}
-			b := NewMultiPointISO6709(t)
-			if b == nil {
-				return errors.New("Unexpected CharData on Coordinates UnmarshalXML")
-			}
-			for i := range b {
-				*cds = append(*cds, b[i])
-			}
-		case xml.EndElement:
-			return nil
-		default:
-			return fmt.Errorf("Unexpected Token on LatLongs %v", reflect.TypeOf(token))
-		}
-	}
 }
 
 // Radiusp is un-used

@@ -8,8 +8,15 @@ import (
 
 // Polygon inherited MultiPoint
 type Polygon struct {
-	MultiPoint
+	LineString
 }
+
+/*
+// UnmarshalText is from ISO6709 latlongs.
+func (cds *Polygon) UnmarshalText(b []byte) error {
+	return cds.MultiPoint.UnmarshalText(b)
+}
+*/
 
 // Type returns this type
 func (Polygon) Type() string {

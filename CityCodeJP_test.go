@@ -21,7 +21,8 @@ func TestCityCodeJP(t *testing.T) {
 
 	latlong.Config.YahooJPAPIURL = server.URL
 
-	l := latlong.NewPointISO6709([]byte(`+34.455846+136.725739/`))
+	var l latlong.Point
+	err := l.UnmarshalText([]byte(`+34.455846+136.725739/`))
 
 	latlong.Config.Lang = "ja"
 	latlong.Config.GoogleAPIKey = "AIzaNotReallyAnAPIKey"

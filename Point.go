@@ -35,6 +35,37 @@ func NewPoint(lat, lng Angle, altitude *float64) (latlongalt Point) {
 	return
 }
 
+// UnmarshalText is from ISO6709 latlongs.
+func (latlong *Point) UnmarshalText(iso6709 []byte) error {
+	re := regexp.MustCompile(`(?P<Latitude>[\+-][\d.]+)(?P<Longitude>[\+-][\d.]+)(?P<Altitude>[\+-][\d.]+)?`)
+
+	if re.Match(iso6709) {
+		match := re.FindSubmatch(iso6709)
+
+		var lat, lng Angle
+		var altitude *float64
+
+		for i, name := range re.SubexpNames() {
+			if i == 0 || name == "" {
+				continue
+			}
+
+			switch name {
+			case "Latitude":
+				lat = AngleFromBytes(match[i])
+			case "Longitude":
+				lng = AngleFromBytes(match[i])
+			case "Altitude":
+				altitude = getAlt(match[i])
+			}
+		}
+		*latlong = NewPoint(lat, lng, altitude)
+		return nil
+	}
+	panic(iso6709)
+}
+
+/*
 // NewPointISO6709 is from ISO6709 string
 func NewPointISO6709(iso6709 []byte) Point {
 	re := regexp.MustCompile(`(?P<Latitude>[\+-][\d.]+)(?P<Longitude>[\+-][\d.]+)(?P<Altitude>[\+-][\d.]+)?`)
@@ -63,6 +94,7 @@ func NewPointISO6709(iso6709 []byte) Point {
 	}
 	panic(iso6709)
 }
+*/
 
 // NewPointFromS2Point is from s2.Point
 func NewPointFromS2Point(p s2.Point) Point {
@@ -85,6 +117,7 @@ func (latlong Point) Equal(latlong1 Geometry) bool {
 	return latlong == latlong1.(Point)
 }
 
+/*
 // Scan is for fmt.Scanner
 func (latlong *Point) Scan(state fmt.ScanState, verb rune) (err error) {
 	var token []byte
@@ -94,6 +127,7 @@ func (latlong *Point) Scan(state fmt.ScanState, verb rune) (err error) {
 	}
 	return
 }
+*/
 
 // S2LatLng is getter for s2.LatLng
 func (latlong Point) S2LatLng() s2.LatLng {
