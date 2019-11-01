@@ -10,3 +10,5 @@ require (
 	golang.org/x/time v0.0.0-20180412165947-fbb02b2291d2 // indirect
 	googlemaps.github.io/maps v0.0.0-20180924193102-3f82d110e780
 )
+
+go 1.13

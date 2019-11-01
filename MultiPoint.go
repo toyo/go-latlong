@@ -85,7 +85,11 @@ func (cds MultiPoint) Radiusp() *float64 {
 // NewGeoJSONGeometry returns GeoJSONGeometry.
 func (cds MultiPoint) NewGeoJSONGeometry() *GeoJSONGeometry {
 	var g GeoJSONGeometry
-	g.geo = cds
+	if len(cds) == 1 {
+		g.geo = cds[0]
+	} else {
+		g.geo = cds
+	}
 	return &g
 }
 

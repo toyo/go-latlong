@@ -17,6 +17,11 @@ func (LineString) Type() string {
 	return "LineString"
 }
 
+// Polygon make polygon from LineString
+func (cds *LineString) Polygon() Polygon {
+	return Polygon{LineString: *cds}
+}
+
 // UnmarshalText is from ISO6709 latlongs.
 func (cds *LineString) UnmarshalText(b []byte) error {
 	return cds.MultiPoint.UnmarshalText(b)
