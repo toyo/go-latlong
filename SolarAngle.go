@@ -3,7 +3,7 @@ package latlong
 import (
 	"time"
 
-	"github.com/KlausBrunner/gosolarpos"
+	"github.com/klausbrunner/gosolarpos"
 )
 
 // SolarAngle returns an solar angle at time t.
