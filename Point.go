@@ -248,7 +248,7 @@ type config struct {
 
 // Config is an configuration of environment.
 var Config = config{
-	HTTPClient:    &http.Client{},
+	HTTPClient:    http.DefaultClient,
 	Lang:          "en", // or "ja" 	// Lang is an string language
 	YahooJPAPIURL: "https://map.yahooapis.jp/geoapi/V1/reverseGeoCoder",
 }
