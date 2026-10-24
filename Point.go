@@ -209,7 +209,7 @@ func (latlong Point) String() string {
 		if *latlong.alt > 0 {
 			ss = append(ss, fmt.Sprintf(msgCatalog[Config.Lang].elv, *latlong.alt))
 		} else if *latlong.alt > -10000 {
-			ss = append(ss, fmt.Sprintf(msgCatalog[Config.Lang].ground))
+			ss = append(ss, msgCatalog[Config.Lang].ground)
 		} else {
 			ss = append(ss, fmt.Sprintf(msgCatalog[Config.Lang].dep, *latlong.alt/(-1000)))
 		}
